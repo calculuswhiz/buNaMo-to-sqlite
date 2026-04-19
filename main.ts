@@ -375,7 +375,7 @@ async function processVerbs(repository: Repository) {
 }
 
 async function main() {
-  const db = await initializeDefaultDb(true);
+  const db = await initializeDefaultDb(true, './output/buNaMo.sqlite');
   const repository = new Repository(db);
   await repository.initialize();
 

@@ -4,11 +4,11 @@ import { _nn } from './util';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use';
 
-export async function initializeDefaultDb(clean: boolean) {
+export async function initializeDefaultDb(clean: boolean, outFile: string) {
   if (clean)
-    await fs.rm('./output/gramadan.sqlite', { force: true });
+    await fs.rm(outFile, { force: true });
 
-  const db = new DatabaseSync('./output/gramadan.sqlite');
+  const db = new DatabaseSync(outFile);
   db.exec(await fs.readFile('./sql/Schema.sql', 'utf-8'));
   return db;
 }

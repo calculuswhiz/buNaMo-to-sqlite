@@ -1,5 +1,5 @@
 {
-  "name": "gramadan-to-sqlite",
+  "name": "bunamo-to-sqlite",
   "version": "1.0.0",
   "description": "Utility to convert the Irish Morphology db xml files to an sqlite file",
   "license": "ISC",

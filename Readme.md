@@ -1,6 +1,6 @@
-# Gramadan to SQLite
+# BuNaMo to SQLite
 
-A simple tool to convert Gramadan XML files to a SQLite database.
+A simple tool to convert Irish National Morphology Database (BuNaMo) XML files to a SQLite database.
 
 ## DB Schema
 
@@ -8,7 +8,7 @@ See Schema.sql for the database schema.
 
 ## Usage
 
-To run this tool, you need to clone the Irish National Morphology Database
+To run this tool, you need to clone the **Irish National Morphology Database**
 [repository][1] to the root of this project.
 
 [1]: https://github.com/michmech/BuNaMo
@@ -25,7 +25,7 @@ Finally, run the conversion:
 npx tsx ./main.ts
 ```
 
-This creates `gramadan.sqlite` in the output directory.
+This creates `buNaMo.sqlite` in the output directory.
 
 ## About
 
@@ -34,7 +34,10 @@ I wanted something more database-like for another project.
 
 You can find a pre-built version of the database in the `output` directory.
 
-I am not in any way affiliated with Foras na Gaeilge, the copyright holders of
-the repository.
-
 [2]: https://github.com/michmech/Gramadan
+
+## Affiliation
+
+I am not in any way affiliated with Foras na Gaeilge, the copyright holders of
+the data.
+
