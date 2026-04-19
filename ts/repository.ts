@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'fs/promises';
 import { _nn } from './util';
+import path from 'path';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use';
 
@@ -16,7 +17,6 @@ export async function initializeDefaultDb(clean: boolean, outFile: string) {
 export class Repository {
   db: DatabaseSync;
   private inserters: {
-    insertLexeme: ReturnType<DatabaseSync['prepare']>,
     insertNoun: ReturnType<DatabaseSync['prepare']>,
     insertNounForm: ReturnType<DatabaseSync['prepare']>,
     insertNounPhrase: ReturnType<DatabaseSync['prepare']>,
@@ -60,12 +60,9 @@ export class Repository {
   }
 
   async generatePreparedStatements() {
-    const directoryName = './sql/PreparedStatements';
+    const directoryName = path.join(__dirname, '../sql/PreparedStatements');
 
     this.inserters = {
-      insertLexeme: this.db.prepare(
-        await fs.readFile(`${directoryName}/InsertLexeme.sql`, 'utf-8')
-      ),
       insertNoun: this.db.prepare(
         await fs.readFile(`${directoryName}/InsertNoun.sql`, 'utf-8')
       ),
@@ -107,31 +104,24 @@ export class Repository {
 
   // Insertion API. Always returns ID of the inserted row
 
-  insertLexeme(kind: string, lemma: string, disambig: string | null) {
-    return _nn(
-      this.inserters, uninitializedErrorMessage
-    ).insertLexeme
-      .run(null, kind, lemma, disambig)
-      .lastInsertRowid as number;
-  }
-
   insertNoun(
-    lexemeId: number,
     declension: number,
     isProper: boolean,
     isImmutable: boolean,
     isDefinite: boolean,
-    allowArticledGenitive: boolean) {
+    allowArticledGenitive: boolean,
+    disambig: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertNoun
       .run(
-        lexemeId,
+        null,
         declension,
         +isProper,
         +isImmutable,
         +isDefinite,
-        +allowArticledGenitive
+        +allowArticledGenitive,
+        disambig
       ).lastInsertRowid as number;
   }
 
@@ -150,15 +140,15 @@ export class Repository {
   }
 
   insertNounPhrase(
-    lexemeId: number,
     isDefinite: boolean,
     isPossessed: boolean,
     isImmutable: boolean,
-    forceNominative: boolean) {
+    forceNominative: boolean,
+    disambig: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertNounPhrase
-      .run(lexemeId, +isDefinite, +isPossessed, +isImmutable, +forceNominative)
+      .run(null, +isDefinite, +isPossessed, +isImmutable, +forceNominative, disambig)
       .lastInsertRowid as number;
   }
 
@@ -175,11 +165,11 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
-  insertAdjective(lexemeId: number, declension: number, isPre: boolean) {
+  insertAdjective(declension: number, isPre: boolean, disambig: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertAdjective
-      .run(lexemeId, declension, +isPre)
+      .run(null, declension, +isPre, disambig)
       .lastInsertRowid as number;
   }
 
@@ -195,11 +185,11 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
-  insertVerb(lexemeId: number) {
+  insertVerb(disambig: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertVerb
-      .run(lexemeId)
+      .run(null, disambig)
       .lastInsertRowid as number;
   }
 
@@ -219,11 +209,11 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
-  insertPreposition(lexemeId: number) {
+  insertPreposition(disambig: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPreposition
-      .run(lexemeId)
+      .run(null, disambig)
       .lastInsertRowid as number;
   }
 
@@ -240,14 +230,14 @@ export class Repository {
   }
 
   insertPossessive(
-    lexemeId: number,
     mutation: string,
-    emphasizer: string
+    emphasizer: string,
+    disambig: string
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPossessive
-      .run(lexemeId, mutation, emphasizer)
+      .run(null, mutation, emphasizer, disambig)
       .lastInsertRowid as number;
   }
 
@@ -262,4 +252,6 @@ export class Repository {
       .run(null, possessiveId, slot, value)
       .lastInsertRowid as number;
   }
+
+  // TODO Retrieval API
 }

@@ -1,41 +1,20 @@
 PRAGMA foreign_keys = ON;
 
--- Every xml file entry is a lexeme
-CREATE TABLE
-  IF NOT EXISTS lexeme (
-    id INTEGER PRIMARY KEY,
-    kind TEXT NOT NULL CHECK (
-      kind IN (
-        /*  While the C# code has more types, like "prepositional phrase" and "verb phrase",
-        There are no XML files of those types, so we can ignore them for now.
-         */
-        'noun',
-        'nounPhrase',
-        'adjective',
-        'verb',
-        'preposition',
-        'possessive'
-      )
-    ),
-    lemma TEXT NOT NULL,
-    disambig TEXT NOT NULL DEFAULT ''
-    /* Cannot add unique constraint here. XML data is not guaranteed to be unique at this level, even with disambig. Perhaps the filenames could be considered as a field? */
-  );
-
 CREATE TABLE
   IF NOT EXISTS noun (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE,
+    noun_id INTEGER PRIMARY KEY,
     declension INTEGER NOT NULL DEFAULT 0,
     is_proper INTEGER NOT NULL DEFAULT 0 CHECK (is_proper IN (0, 1)),
     is_immutable INTEGER NOT NULL DEFAULT 0 CHECK (is_immutable IN (0, 1)),
     is_definite INTEGER NOT NULL DEFAULT 0 CHECK (is_definite IN (0, 1)),
-    allow_articled_genitive INTEGER NOT NULL DEFAULT 0 CHECK (allow_articled_genitive IN (0, 1))
+    allow_articled_genitive INTEGER NOT NULL DEFAULT 0 CHECK (allow_articled_genitive IN (0, 1)),
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS noun_form (
-    id INTEGER PRIMARY KEY,
-    noun_id INTEGER NOT NULL REFERENCES noun (lexeme_id) ON DELETE CASCADE,
+    noun_form_id INTEGER PRIMARY KEY,
+    noun_id INTEGER NOT NULL REFERENCES noun (noun_id) ON DELETE CASCADE,
     slot TEXT NOT NULL CHECK (
       slot IN (
         'sgNom',
@@ -61,17 +40,18 @@ CREATE TABLE
 
 CREATE TABLE
   IF NOT EXISTS noun_phrase (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE,
+    noun_phrase_id INTEGER PRIMARY KEY,
     is_definite INTEGER NOT NULL DEFAULT 0 CHECK (is_definite IN (0, 1)),
     is_possessed INTEGER NOT NULL DEFAULT 0 CHECK (is_possessed IN (0, 1)),
     is_immutable INTEGER NOT NULL DEFAULT 0 CHECK (is_immutable IN (0, 1)),
-    force_nominative INTEGER NOT NULL DEFAULT 0 CHECK (force_nominative IN (0, 1))
+    force_nominative INTEGER NOT NULL DEFAULT 0 CHECK (force_nominative IN (0, 1)),
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS noun_phrase_form (
-    id INTEGER PRIMARY KEY,
-    noun_phrase_id INTEGER NOT NULL REFERENCES noun_phrase (lexeme_id) ON DELETE CASCADE,
+    noun_phrase_form_id INTEGER PRIMARY KEY,
+    noun_phrase_id INTEGER NOT NULL REFERENCES noun_phrase (noun_phrase_id) ON DELETE CASCADE,
     slot TEXT NOT NULL CHECK (
       slot IN (
         'sgNom',
@@ -98,15 +78,16 @@ CREATE TABLE
 
 CREATE TABLE
   IF NOT EXISTS adjective (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE,
+    adjective_id INTEGER PRIMARY KEY,
     declension INTEGER NOT NULL DEFAULT 0,
-    is_pre INTEGER NOT NULL DEFAULT 0 CHECK (is_pre IN (0, 1))
+    is_pre INTEGER NOT NULL DEFAULT 0 CHECK (is_pre IN (0, 1)),
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS adjective_form (
-    id INTEGER PRIMARY KEY,
-    adjective_id INTEGER NOT NULL REFERENCES adjective (lexeme_id) ON DELETE CASCADE,
+    adjective_form_id INTEGER PRIMARY KEY,
+    adjective_id INTEGER NOT NULL REFERENCES adjective (adjective_id) ON DELETE CASCADE,
     slot TEXT NOT NULL CHECK (
       slot IN (
         'sgNom',
@@ -124,13 +105,14 @@ CREATE TABLE
 
 CREATE TABLE
   IF NOT EXISTS verb (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE
+    verb_id INTEGER PRIMARY KEY,
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS verb_form (
-    id INTEGER PRIMARY KEY,
-    verb_id INTEGER NOT NULL REFERENCES verb (lexeme_id) ON DELETE CASCADE,
+    verb_form_id INTEGER PRIMARY KEY,
+    verb_id INTEGER NOT NULL REFERENCES verb (verb_id) ON DELETE CASCADE,
     form_type TEXT NOT NULL CHECK (
       form_type IN (
         'verbalNoun',
@@ -184,13 +166,14 @@ CREATE TABLE
 
 CREATE TABLE
   IF NOT EXISTS preposition (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE
+    preposition_id INTEGER PRIMARY KEY,
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS preposition_form (
-    id INTEGER PRIMARY KEY,
-    preposition_id INTEGER NOT NULL REFERENCES preposition (lexeme_id) ON DELETE CASCADE,
+    preposition_form_id INTEGER PRIMARY KEY,
+    preposition_id INTEGER NOT NULL REFERENCES preposition (preposition_id) ON DELETE CASCADE,
     slot TEXT NOT NULL CHECK (
       slot IN (
         'sg1',
@@ -207,7 +190,7 @@ CREATE TABLE
 
 CREATE TABLE
   IF NOT EXISTS possessive (
-    lexeme_id INTEGER PRIMARY KEY REFERENCES lexeme (id) ON DELETE CASCADE,
+    possessive_id INTEGER PRIMARY KEY,
     mutation TEXT NOT NULL CHECK (
       mutation IN (
         'none',
@@ -225,18 +208,17 @@ CREATE TABLE
         'len3D'
       )
     ),
-    emphasizer TEXT NOT NULL CHECK (emphasizer IN ('saSe', 'sanSean', 'naNe'))
+    emphasizer TEXT NOT NULL CHECK (emphasizer IN ('saSe', 'sanSean', 'naNe')),
+    disambig TEXT NOT NULL
   );
 
 CREATE TABLE
   IF NOT EXISTS possessive_form (
-    id INTEGER PRIMARY KEY,
-    possessive_id INTEGER NOT NULL REFERENCES possessive (lexeme_id) ON DELETE CASCADE,
+    possessive_form_id INTEGER PRIMARY KEY,
+    possessive_id INTEGER NOT NULL REFERENCES possessive (possessive_id) ON DELETE CASCADE,
     slot TEXT NOT NULL CHECK (slot IN ('full', 'apos')),
     value TEXT NOT NULL
   );
-
-CREATE INDEX IF NOT EXISTS idx_lexeme_kind_lemma ON lexeme (kind, lemma);
 
 CREATE INDEX IF NOT EXISTS idx_noun_form_value ON noun_form (value);
 

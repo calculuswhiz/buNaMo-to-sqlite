@@ -1,4 +1,4 @@
 INSERT INTO
-  possessive (lexeme_id, mutation, emphasizer)
+  possessive (possessive_id, mutation, emphasizer, disambig)
 VALUES
-  (?, ?, ?);
+  (?, ?, ?, ?);

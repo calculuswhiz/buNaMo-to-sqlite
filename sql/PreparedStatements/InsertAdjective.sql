@@ -1,4 +1,4 @@
 INSERT INTO
-  adjective (lexeme_id, declension, is_pre)
+  adjective (adjective_id, declension, is_pre, disambig)
 VALUES
-  (?, ?, ?)
+  (?, ?, ?, ?);

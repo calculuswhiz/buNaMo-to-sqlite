@@ -26,16 +26,10 @@ async function processAdjectives(repository: Repository) {
     try {
       const { adjective } = await parseXmlFile(`./BuNaMo-master/adjective/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'adjective',
-        adjective.sgNom[0].$.default,
-        adjective.$.disambig
-      );
-
       const adjectiveId = repository.insertAdjective(
-        lexemeId,
         adjective.$.declension,
-        adjective.$.pre ?? false
+        adjective.$.pre ?? false,
+        adjective.$.disambig ?? ''
       );
 
       for (const [formKey, formValue] of Object.entries(adjective)) {
@@ -83,19 +77,14 @@ async function processNouns(repository: Repository) {
     try {
       const { noun } = await parseXmlFile(`./BuNaMo-master/noun/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'noun',
-        noun.sgNom[0].$.default,
-        noun.$.disambig
-      );
-
       const nounId = repository.insertNoun(
-        lexemeId,
         noun.$.declension,
         noun.$.proper ?? false,
         noun.$.immutable ?? false,
         noun.$.definite ?? false,
-        noun.$.allowArticledGenitive ?? false
+        noun.$.allowArticledGenitive ?? false,
+        noun.$.disambig ?? ''
+
       );
 
       for (const [formKey, formValue] of Object.entries(noun)) {
@@ -146,23 +135,12 @@ async function processNounPhrases(repository: Repository) {
     try {
       const { nounPhrase } = await parseXmlFile(`./BuNaMo-master/nounPhrase/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'nounPhrase',
-        (
-          nounPhrase.sgNom
-          ?? nounPhrase.sgNomArt
-          ?? nounPhrase.plNom
-          ?? nounPhrase.plNomArt
-        )[0].$.default,
-        nounPhrase.$.disambig
-      );
-
       const nounPhraseId = repository.insertNounPhrase(
-        lexemeId,
         nounPhrase.$.definite ?? false,
         nounPhrase.$.possessed ?? false,
         nounPhrase.$.immutable ?? false,
-        nounPhrase.$.forceNominative ?? false
+        nounPhrase.$.forceNominative ?? false,
+        nounPhrase.$.disambig ?? ''
       );
 
       for (const [formKey, formValue] of Object.entries(nounPhrase)) {
@@ -212,16 +190,10 @@ async function processPossessives(repository: Repository) {
     try {
       const { possessive } = await parseXmlFile(`./BuNaMo-master/possessive/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'possessive',
-        possessive.full[0].$.default,
-        possessive.$.disambig
-      );
-
       const possessiveId = repository.insertPossessive(
-        lexemeId,
         possessive.$.mutation ?? '',
-        possessive.$.emphasizer ?? ''
+        possessive.$.emphasizer ?? '',
+        possessive.$.disambig ?? ''
       );
 
       for (const [formKey, formValue] of Object.entries(possessive)) {
@@ -270,13 +242,9 @@ async function processPrepositions(repository: Repository) {
     try {
       const { preposition } = await parseXmlFile(`./BuNaMo-master/preposition/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'preposition',
-        preposition.$.default,
-        preposition.$.disambig
+      const prepositionId = repository.insertPreposition(
+        preposition.$.disambig ?? ''
       );
-
-      const prepositionId = repository.insertPreposition(lexemeId);
 
       for (const [formKey, formValue] of Object.entries(preposition)) {
         // Skip attributes
@@ -324,14 +292,9 @@ async function processVerbs(repository: Repository) {
     try {
       const { verb } = await parseXmlFile(`./BuNaMo-master/verb/${file}`);
 
-      const lexemeId = repository.insertLexeme(
-        'verb',
-        // TODO Come back to this.
-        verb.$.default,
-        verb.$.disambig
+      const verbId = repository.insertVerb(
+        verb.$.disambig ?? ''
       );
-
-      const verbId = repository.insertVerb(lexemeId);
 
       for (const [formKey, formValue] of Object.entries(verb)) {
         // Skip attributes
@@ -375,7 +338,15 @@ async function processVerbs(repository: Repository) {
 }
 
 async function main() {
-  const db = await initializeDefaultDb(true, './output/buNaMo.sqlite');
+  if (!await fs.stat('./BuNaMo-master').catch(() => false)) {
+    console.error('BuNaMo-master directory not found. Please clone the BuNaMo repository into the project directory.');
+    console.error("    git clone https://github.com/michmech/BuNaMo.git")
+    process.exit(1);
+  }
+
+  const shouldRebuild = process.argv.includes('--rebuild');
+
+  const db = await initializeDefaultDb(shouldRebuild, './output/buNaMo.sqlite');
   const repository = new Repository(db);
   await repository.initialize();
 

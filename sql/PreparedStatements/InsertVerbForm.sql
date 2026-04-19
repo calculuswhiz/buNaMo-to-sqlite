@@ -1,6 +1,6 @@
 INSERT INTO
   verb_form (
-    id,
+    verb_form_id,
     verb_id,
     form_type,
     value,

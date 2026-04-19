@@ -1,4 +1,4 @@
 INSERT INTO
-  verb (lexeme_id)
+  verb (verb_id, disambig)
 VALUES
-  (?);
+  (?, ?);

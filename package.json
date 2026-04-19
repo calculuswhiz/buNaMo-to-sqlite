@@ -7,7 +7,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsx ts/build.ts",
+    "rebuild": "tsx ts/build.ts --rebuild"
   },
   "dependencies": {
     "@types/node": "^25.6.0",
