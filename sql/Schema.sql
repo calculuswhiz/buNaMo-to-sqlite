@@ -15,8 +15,8 @@ CREATE TABLE
   IF NOT EXISTS noun_form (
     noun_form_id INTEGER PRIMARY KEY,
     noun_id INTEGER NOT NULL REFERENCES noun (noun_id) ON DELETE CASCADE,
-    slot TEXT NOT NULL CHECK (
-      slot IN (
+    form_name TEXT NOT NULL CHECK (
+      form_name IN (
         'sgNom',
         'sgGen',
         'sgVoc',
@@ -52,8 +52,8 @@ CREATE TABLE
   IF NOT EXISTS noun_phrase_form (
     noun_phrase_form_id INTEGER PRIMARY KEY,
     noun_phrase_id INTEGER NOT NULL REFERENCES noun_phrase (noun_phrase_id) ON DELETE CASCADE,
-    slot TEXT NOT NULL CHECK (
-      slot IN (
+    form_name TEXT NOT NULL CHECK (
+      form_name IN (
         'sgNom',
         'sgGen',
         'sgNomArt',
@@ -88,8 +88,8 @@ CREATE TABLE
   IF NOT EXISTS adjective_form (
     adjective_form_id INTEGER PRIMARY KEY,
     adjective_id INTEGER NOT NULL REFERENCES adjective (adjective_id) ON DELETE CASCADE,
-    slot TEXT NOT NULL CHECK (
-      slot IN (
+    form_name TEXT NOT NULL CHECK (
+      form_name IN (
         'sgNom',
         'sgGenMasc',
         'sgGenFem',
@@ -153,14 +153,6 @@ CREATE TABLE
         'Auto'
       )
       OR person IS NULL
-    ),
-    UNIQUE (
-      verb_id,
-      form_type,
-      tense,
-      dependency,
-      mood,
-      person
     )
   );
 
@@ -174,8 +166,8 @@ CREATE TABLE
   IF NOT EXISTS preposition_form (
     preposition_form_id INTEGER PRIMARY KEY,
     preposition_id INTEGER NOT NULL REFERENCES preposition (preposition_id) ON DELETE CASCADE,
-    slot TEXT NOT NULL CHECK (
-      slot IN (
+    form_name TEXT NOT NULL CHECK (
+      form_name IN (
         'sg1',
         'sg2',
         'sg3Masc',
@@ -216,7 +208,7 @@ CREATE TABLE
   IF NOT EXISTS possessive_form (
     possessive_form_id INTEGER PRIMARY KEY,
     possessive_id INTEGER NOT NULL REFERENCES possessive (possessive_id) ON DELETE CASCADE,
-    slot TEXT NOT NULL CHECK (slot IN ('full', 'apos')),
+    form_name TEXT NOT NULL CHECK (form_name IN ('full', 'apos')),
     value TEXT NOT NULL
   );
 

@@ -127,7 +127,7 @@ export class Repository {
 
   insertNounForm(
     nounId: number,
-    slot: string,
+    formName: string,
     value: string,
     gender: string | null,
     strength: string | null
@@ -135,7 +135,7 @@ export class Repository {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertNounForm
-      .run(null, nounId, slot, value, gender, strength)
+      .run(null, nounId, formName, value, gender, strength)
       .lastInsertRowid as number;
   }
 
@@ -154,14 +154,14 @@ export class Repository {
 
   insertNounPhraseForm(
     nounPhraseId: number,
-    slot: string,
+    formName: string,
     value: string,
     gender: string | null
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertNounPhraseForm
-      .run(null, nounPhraseId, slot, value, gender)
+      .run(null, nounPhraseId, formName, value, gender)
       .lastInsertRowid as number;
   }
 
@@ -175,13 +175,13 @@ export class Repository {
 
   insertAdjectiveForm(
     adjectiveId: number,
-    slot: string,
+    formName: string,
     value: string,
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertAdjectiveForm
-      .run(null, adjectiveId, slot, value)
+      .run(null, adjectiveId, formName, value)
       .lastInsertRowid as number;
   }
 
@@ -219,13 +219,13 @@ export class Repository {
 
   insertPrepositionForm(
     prepositionId: number,
-    slot: string,
+    formName: string,
     value: string
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPrepositionForm
-      .run(null, prepositionId, slot, value)
+      .run(null, prepositionId, formName, value)
       .lastInsertRowid as number;
   }
 
@@ -243,13 +243,13 @@ export class Repository {
 
   insertPossessiveForm(
     possessiveId: number,
-    slot: string,
+    formName: string,
     value: string
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPossessiveForm
-      .run(null, possessiveId, slot, value)
+      .run(null, possessiveId, formName, value)
       .lastInsertRowid as number;
   }
 
