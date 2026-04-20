@@ -1,4 +1,4 @@
 INSERT INTO
-  preposition (preposition_id, disambig)
+  preposition (preposition_id, disambig, lemma)
 VALUES
-  (?, ?);
+  (?, ?, ?);

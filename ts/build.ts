@@ -193,7 +193,8 @@ async function processPossessives(repository: Repository) {
       const possessiveId = repository.insertPossessive(
         possessive.$.mutation ?? '',
         possessive.$.emphasizer ?? '',
-        possessive.$.disambig ?? ''
+        possessive.$.disambig ?? '',
+        possessive.$.default ?? ''
       );
 
       for (const [formKey, formValue] of Object.entries(possessive)) {
@@ -243,7 +244,8 @@ async function processPrepositions(repository: Repository) {
       const { preposition } = await parseXmlFile(`./BuNaMo-master/preposition/${file}`);
 
       const prepositionId = repository.insertPreposition(
-        preposition.$.disambig ?? ''
+        preposition.$.disambig ?? '',
+        preposition.$.default ?? ''
       );
 
       for (const [formKey, formValue] of Object.entries(preposition)) {

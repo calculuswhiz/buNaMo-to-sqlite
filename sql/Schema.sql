@@ -1,6 +1,33 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE
+  IF NOT EXISTS adjective (
+    adjective_id INTEGER PRIMARY KEY,
+    declension INTEGER NOT NULL DEFAULT 0,
+    is_pre INTEGER NOT NULL DEFAULT 0 CHECK (is_pre IN (0, 1)),
+    disambig TEXT NOT NULL
+  );
+
+CREATE TABLE
+  IF NOT EXISTS adjective_form (
+    adjective_form_id INTEGER PRIMARY KEY,
+    adjective_id INTEGER NOT NULL REFERENCES adjective (adjective_id) ON DELETE CASCADE,
+    form_name TEXT NOT NULL CHECK (
+      form_name IN (
+        'sgNom',
+        'sgGenMasc',
+        'sgGenFem',
+        'sgVocMasc',
+        'sgVocFem',
+        'plNom',
+        'graded',
+        'abstractNoun'
+      )
+    ),
+    value TEXT NOT NULL
+  );
+
+CREATE TABLE
   IF NOT EXISTS noun (
     noun_id INTEGER PRIMARY KEY,
     declension INTEGER NOT NULL DEFAULT 0,
@@ -77,29 +104,62 @@ CREATE TABLE
   );
 
 CREATE TABLE
-  IF NOT EXISTS adjective (
-    adjective_id INTEGER PRIMARY KEY,
-    declension INTEGER NOT NULL DEFAULT 0,
-    is_pre INTEGER NOT NULL DEFAULT 0 CHECK (is_pre IN (0, 1)),
-    disambig TEXT NOT NULL
+  IF NOT EXISTS preposition (
+    preposition_id INTEGER PRIMARY KEY,
+    disambig TEXT NOT NULL,
+    -- lemmas distinct from forms
+    lemma TEXT NOT NULL
   );
 
 CREATE TABLE
-  IF NOT EXISTS adjective_form (
-    adjective_form_id INTEGER PRIMARY KEY,
-    adjective_id INTEGER NOT NULL REFERENCES adjective (adjective_id) ON DELETE CASCADE,
+  IF NOT EXISTS preposition_form (
+    preposition_form_id INTEGER PRIMARY KEY,
+    preposition_id INTEGER NOT NULL REFERENCES preposition (preposition_id) ON DELETE CASCADE,
     form_name TEXT NOT NULL CHECK (
       form_name IN (
-        'sgNom',
-        'sgGenMasc',
-        'sgGenFem',
-        'sgVocMasc',
-        'sgVocFem',
-        'plNom',
-        'graded',
-        'abstractNoun'
+        'sg1',
+        'sg2',
+        'sg3Masc',
+        'sg3Fem',
+        'pl1',
+        'pl2',
+        'pl3'
       )
     ),
+    value TEXT NOT NULL
+  );
+
+CREATE TABLE
+  IF NOT EXISTS possessive (
+    possessive_id INTEGER PRIMARY KEY,
+    mutation TEXT NOT NULL CHECK (
+      mutation IN (
+        'none',
+        'len1',
+        'len2',
+        'len3',
+        'ecl1',
+        'ecl1x',
+        'ecl2',
+        'ecl3',
+        'prefT',
+        'prefH',
+        'len1D',
+        'len2D',
+        'len3D'
+      )
+    ),
+    emphasizer TEXT NOT NULL CHECK (emphasizer IN ('saSe', 'sanSean', 'naNe')),
+    disambig TEXT NOT NULL,
+    -- lemmas distinct from forms
+    lemma TEXT NOT NULL
+  );
+
+CREATE TABLE
+  IF NOT EXISTS possessive_form (
+    possessive_form_id INTEGER PRIMARY KEY,
+    possessive_id INTEGER NOT NULL REFERENCES possessive (possessive_id) ON DELETE CASCADE,
+    form_name TEXT NOT NULL CHECK (form_name IN ('full', 'apos')),
     value TEXT NOT NULL
   );
 
@@ -154,62 +214,6 @@ CREATE TABLE
       )
       OR person IS NULL
     )
-  );
-
-CREATE TABLE
-  IF NOT EXISTS preposition (
-    preposition_id INTEGER PRIMARY KEY,
-    disambig TEXT NOT NULL
-  );
-
-CREATE TABLE
-  IF NOT EXISTS preposition_form (
-    preposition_form_id INTEGER PRIMARY KEY,
-    preposition_id INTEGER NOT NULL REFERENCES preposition (preposition_id) ON DELETE CASCADE,
-    form_name TEXT NOT NULL CHECK (
-      form_name IN (
-        'sg1',
-        'sg2',
-        'sg3Masc',
-        'sg3Fem',
-        'pl1',
-        'pl2',
-        'pl3'
-      )
-    ),
-    value TEXT NOT NULL
-  );
-
-CREATE TABLE
-  IF NOT EXISTS possessive (
-    possessive_id INTEGER PRIMARY KEY,
-    mutation TEXT NOT NULL CHECK (
-      mutation IN (
-        'none',
-        'len1',
-        'len2',
-        'len3',
-        'ecl1',
-        'ecl1x',
-        'ecl2',
-        'ecl3',
-        'prefT',
-        'prefH',
-        'len1D',
-        'len2D',
-        'len3D'
-      )
-    ),
-    emphasizer TEXT NOT NULL CHECK (emphasizer IN ('saSe', 'sanSean', 'naNe')),
-    disambig TEXT NOT NULL
-  );
-
-CREATE TABLE
-  IF NOT EXISTS possessive_form (
-    possessive_form_id INTEGER PRIMARY KEY,
-    possessive_id INTEGER NOT NULL REFERENCES possessive (possessive_id) ON DELETE CASCADE,
-    form_name TEXT NOT NULL CHECK (form_name IN ('full', 'apos')),
-    value TEXT NOT NULL
   );
 
 CREATE INDEX IF NOT EXISTS idx_noun_form_value ON noun_form (value);

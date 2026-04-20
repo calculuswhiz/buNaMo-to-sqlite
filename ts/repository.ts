@@ -209,11 +209,11 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
-  insertPreposition(disambig: string) {
+  insertPreposition(disambig: string, lemma: string) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPreposition
-      .run(null, disambig)
+      .run(null, disambig, lemma)
       .lastInsertRowid as number;
   }
 
@@ -232,12 +232,13 @@ export class Repository {
   insertPossessive(
     mutation: string,
     emphasizer: string,
-    disambig: string
+    disambig: string,
+    lemma: string
   ) {
     return _nn(
       this.inserters, uninitializedErrorMessage
     ).insertPossessive
-      .run(null, mutation, emphasizer, disambig)
+      .run(null, mutation, emphasizer, disambig, lemma)
       .lastInsertRowid as number;
   }
 
