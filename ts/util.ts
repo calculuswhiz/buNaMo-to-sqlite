@@ -5,3 +5,10 @@ export function _nn<T>(value: T | null | undefined, message?: string): NonNullab
 
   return value as NonNullable<T>;
 }
+
+export function lowerFirstLetter(str: string): string {
+  if (str.length === 0)
+    return str;
+  else
+    return str[0].toLowerCase() + str.slice(1);
+}

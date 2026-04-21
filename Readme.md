@@ -5,7 +5,7 @@ A fusion of the [BuNaMo][1] and [Gramadan][2] repositories for the Irish languag
 Contains:
 
 - Tools for converting the BuNaMo data into a SQLite database.
-- A pre-built version of the database.
+- A pre-built version of the database and an SQL file describing the schema.
 - TypeScript code for working with the database (ported from Gramadan).
 
 [1]: https://github.com/michmech/BuNaMo
@@ -38,7 +38,7 @@ This creates `buNaMo.sqlite` in the output directory.
 ## Structure
 
 - Main entrypoint is in `main.ts`, which initializes the database and runs the conversion.
-- The schema files is in `sql/Schema.sql`, and prepared statments are in `sql/PreparedStatements/`.
+- The schema files is in `sql/Schema.sql`, and prepared statments are organized by category in the folder.
 - The database abstractions are in `repository.ts`.
 
 ## Affiliation

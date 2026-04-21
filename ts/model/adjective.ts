@@ -1,34 +1,43 @@
 import { mutate } from "../mutators";
 import type { IFriendlyNickNamed, ILexeme } from "./ILexeme";
 
-export class Adjective implements ILexeme, IFriendlyNickNamed {
+export interface IAdjective {
   adjectiveId: number;
-  // The adjective's traditional declension class; default is 0 meaning none or unknown:
+  /** The adjective's traditional declension class; default is 0 meaning none or unknown: */
+  declension: number;
+  isPre: boolean;
+  disambig: string;
+}
+
+export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
+  adjectiveId: number;
   declension: number = 0;
   isPre: boolean;
   disambig: string;
 
-  forms: { [key in AdjectiveFormName]: AdjectiveForm[] } = {
-    sgNom: [],
-    sgGenMasc: [],
-    sgGenFem: [],
-    sgVocMasc: [],
-    sgVocFem: [],
-    plNom: [],
-    graded: [],
-    abstractNoun: []
-  };
+  forms: { [key in AdjectiveFormName]: AdjectiveForm[] };
 
   constructor(props: {
     adjectiveId: number,
     declension: number,
     isPre: boolean,
-    disambig: string
+    disambig: string,
+    forms?: { [key in AdjectiveFormName]?: AdjectiveForm[] }
   }) {
     this.adjectiveId = props.adjectiveId;
     this.declension = props.declension;
     this.isPre = props.isPre;
     this.disambig = props.disambig;
+    this.forms = {
+      sgNom: props.forms?.sgNom ?? [],
+      sgGenMasc: props.forms?.sgGenMasc ?? [],
+      sgGenFem: props.forms?.sgGenFem ?? [],
+      sgVocMasc: props.forms?.sgVocMasc ?? [],
+      sgVocFem: props.forms?.sgVocFem ?? [],
+      plNom: props.forms?.plNom ?? [],
+      graded: props.forms?.graded ?? [],
+      abstractNoun: props.forms?.abstractNoun ?? []
+    };
   }
 
   getLemma(): string {
@@ -85,7 +94,7 @@ export class Adjective implements ILexeme, IFriendlyNickNamed {
     for (const gradedForm of this.forms.graded) {
       if (/^[aeiouáéíóú]/i.test(gradedForm.value))
         forms.push("ab " + gradedForm.value);
-      // Possible bug? Original not case sensitive
+      // Possible typo? Original not case sensitive
       else if (/^f/.test(gradedForm.value))
         forms.push("ab " + mutate('len1', gradedForm.value));
       else
