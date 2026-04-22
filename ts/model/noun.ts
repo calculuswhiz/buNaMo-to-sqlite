@@ -10,33 +10,35 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
   allowArticledGenitive: boolean;
   disambig: string;
 
-  forms: { [key in NounFormName]: NounForm[] } = {
-    sgNom: [],
-    sgGen: [],
-    sgVoc: [],
-    sgDat: [],
-    plNom: [],
-    plGen: [],
-    plVoc: [],
-    count: []
-  };
+  forms: { [key in NounFormName]: NounForm[] };
 
-  constructor(
+  constructor(props: {
     nounId: number,
     declension: number,
     isProper: boolean,
     isImmutable: boolean,
     isDefinite: boolean,
     allowArticledGenitive: boolean,
-    disambig: string
-  ) {
-    this.nounId = nounId;
-    this.declension = declension;
-    this.isProper = isProper;
-    this.isImmutable = isImmutable;
-    this.isDefinite = isDefinite;
-    this.allowArticledGenitive = allowArticledGenitive;
-    this.disambig = disambig;
+    disambig: string,
+    forms?: { [key in NounFormName]?: NounForm[] }
+  }) {
+    this.nounId = props.nounId;
+    this.declension = props.declension;
+    this.isProper = props.isProper;
+    this.isImmutable = props.isImmutable;
+    this.isDefinite = props.isDefinite;
+    this.allowArticledGenitive = props.allowArticledGenitive;
+    this.disambig = props.disambig;
+    this.forms = {
+      sgNom: props.forms?.sgNom ?? [],
+      sgGen: props.forms?.sgGen ?? [],
+      sgVoc: props.forms?.sgVoc ?? [],
+      sgDat: props.forms?.sgDat ?? [],
+      plNom: props.forms?.plNom ?? [],
+      plGen: props.forms?.plGen ?? [],
+      plVoc: props.forms?.plVoc ?? [],
+      count: props.forms?.count ?? []
+    };
   }
 
   getLemma(): string {

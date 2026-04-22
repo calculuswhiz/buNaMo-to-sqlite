@@ -3,6 +3,8 @@ import fs from 'fs/promises';
 import { _nn, lowerFirstLetter } from './util';
 import path from 'path';
 import { Adjective, AdjectiveForm, type AdjectiveFormName } from './model/adjective';
+import { Noun, NounForm, type NounFormName } from './model/noun';
+import type { Gender, Strength } from './features';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
@@ -285,5 +287,75 @@ export class Repository {
     }
 
     return adjective;
+  }
+
+  getNounByLemma(lemma: string) {
+    const foundId = this.db.prepare(
+      `SELECT f.noun_id
+      FROM noun_form AS f 
+      WHERE f.form_name = 'sgNom' AND f.value = :lemma`
+    ).all({ lemma }).at(0)?.noun_id;
+    if (foundId == null)
+      return null;
+
+    const nounRaw = this.db.prepare(
+      `SELECT
+        n.noun_id AS nounId,
+        n.declension AS declension,
+        n.is_proper AS isProper,
+        n.is_immutable AS isImmutable,
+        n.is_definite AS isDefinite,
+        n.allow_articled_genitive AS allowArticledGenitive,
+        n.disambig AS disambig
+      FROM noun AS n
+      WHERE n.noun_id = :foundId`
+    ).get({ foundId });
+
+    if (nounRaw == null)
+      return null;
+
+    const noun = new Noun({
+      nounId: nounRaw.nounId as number,
+      declension: nounRaw.declension as number,
+      isProper: !!nounRaw.isProper,
+      isImmutable: !!nounRaw.isImmutable,
+      isDefinite: !!nounRaw.isDefinite,
+      allowArticledGenitive: !!nounRaw.allowArticledGenitive,
+      disambig: nounRaw.disambig as string,
+    });
+
+    const formsRaw = this.db.prepare(
+      `SELECT
+        form.noun_form_id AS nounFormId,
+        form.form_name AS formName,
+        form.value AS value,
+        form.gender AS gender,
+        form.strength AS strength
+      FROM
+        noun_form form
+      WHERE form.noun_id = :foundId`
+    ).all({ foundId });
+
+    for (const formRaw of formsRaw) {
+      const form = {
+        nounFormId: formRaw.nounFormId as number,
+        formName: formRaw.formName as string,
+        value: formRaw.value as string,
+        gender: formRaw.gender as string | null,
+        strength: formRaw.strength as string | null
+      };
+      noun.forms[form.formName as NounFormName].push(
+        new NounForm(
+          form.nounFormId,
+          noun.nounId,
+          form.formName as NounFormName,
+          form.value,
+          form.gender as Gender | null,
+          form.strength as Strength | null
+        )
+      );
+    }
+
+    return noun;
   }
 }

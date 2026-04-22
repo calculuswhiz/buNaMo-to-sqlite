@@ -19,5 +19,18 @@ repository.initialize().then(async () => {
     assert.equal(adjective.getComparativePast()[0], "ní b'fhéasógaí");
     assert.equal(adjective.getSuperlativePast()[0], 'ab fhéasógaí');
   });
+
+  test('Test reading noun data', () => {
+    const noun = _nn(
+      repository.getNounByLemma("cat"),
+      'Noun not found'
+    );
+    
+    assert.equal(noun.getLemma(), "cat");
+    assert.equal(noun.getGender(), "masc");
+    assert.equal(noun.forms.sgGen[0].value, "cait");
+    assert.equal(noun.forms.plNom[0].value, "cait");
+    assert.equal(noun.forms.plGen[0].value, "cat");
+  });
 });
 
