@@ -4,8 +4,9 @@ import { _nn, lowerFirstLetter } from './util';
 import path from 'path';
 import { Adjective, AdjectiveForm, type AdjectiveFormName } from './model/adjective';
 import { Noun, NounForm, type NounFormName } from './model/noun';
-import type { Gender, Strength } from './features';
+import type { Emphasizer, Gender, Mutation, Strength } from './features';
 import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from './model/nounPhrase';
+import { Possessive, PossessiveForm, type PossessiveFormName } from './model/possessive';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
@@ -423,5 +424,58 @@ export class Repository {
     }
 
     return nounPhrase;
+  }
+
+  getPossessiveByLemma(lemma: string) {
+    // TODO these should return more than one since lemma is not unique
+
+    const possessiveRaw = this.db.prepare(
+      `SELECT
+        p.possessive_id AS possessiveId,
+        p.mutation AS mutation,
+        p.emphasizer AS emphasizer,
+        p.disambig AS disambig,
+        p.lemma AS lemma
+      FROM possessive AS p
+      WHERE p.lemma = :lemma`
+    ).get({ lemma });
+
+    if (possessiveRaw == null)
+      return null;
+
+    const possessive = new Possessive({
+      possessiveId: possessiveRaw.possessiveId as number,
+      mutation: possessiveRaw.mutation as Mutation,
+      emphasizer: possessiveRaw.emphasizer as Emphasizer,
+      disambig: possessiveRaw.disambig as string
+    });
+
+    const formsRaw = this.db.prepare(
+      `SELECT
+        form.possessive_form_id AS possessiveFormId,
+        form.form_name AS formName,
+        form.value AS value
+      FROM
+        possessive_form form
+      WHERE form.possessive_id = :possessiveId`
+    ).all({ possessiveId: possessive.possessiveId });
+
+    for (const formRaw of formsRaw) {
+      const form = {
+        possessiveFormId: formRaw.possessiveFormId as number,
+        formName: formRaw.formName as string,
+        value: formRaw.value as string
+      };
+      possessive.forms[form.formName as PossessiveFormName].push(
+        new PossessiveForm(
+          form.possessiveFormId,
+          possessive.possessiveId,
+          form.formName as PossessiveFormName,
+          form.value
+        )
+      );
+    }
+
+    return possessive;
   }
 }

@@ -49,5 +49,18 @@ repository.initialize().then(async () => {
     assert.equal(nounPhrase.forms.plNomArt[0].value, "na fadhbanna móra");
     assert.equal(nounPhrase.forms.plGenArt[0].value, "na bhfadhbanna móra");
   });
+  
+  test('Test reading possessive data', () => {
+    const possessive = _nn(
+      repository.getPossessiveByLemma("mo"),
+      'Possessive not found'
+    );
+    
+    assert.equal(possessive.getLemma(), "mo");
+    assert.equal(possessive.mutation, "len1");
+    assert.equal(possessive.emphasizer, "saSe");
+    assert.equal(possessive.forms.full[0].value, "mo");
+    assert.equal(possessive.forms.apos[0].value, "m'");
+  });
 });
 

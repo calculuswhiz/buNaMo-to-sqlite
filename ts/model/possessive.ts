@@ -7,21 +7,23 @@ export class Possessive implements ILexeme {
   emphasizer: Emphasizer;
   disambig: string;
 
-  forms: { [key in PossessiveFormName]: PossessiveForm[] } = {
-    full: [],
-    apos: []
-  };
+  forms: { [key in PossessiveFormName]: PossessiveForm[] };
 
-  constructor(
+  constructor(props: {
     possessiveId: number,
     mutation: Mutation,
     emphasizer: Emphasizer,
-    disambig: string
-  ) {
-    this.possessiveId = possessiveId;
-    this.mutation = mutation;
-    this.emphasizer = emphasizer;
-    this.disambig = disambig;
+    disambig: string,
+    forms?: { [key in PossessiveFormName]?: PossessiveForm[] }
+  }) {
+    this.possessiveId = props.possessiveId;
+    this.mutation = props.mutation;
+    this.emphasizer = props.emphasizer;
+    this.disambig = props.disambig;
+    this.forms = {
+      full: props.forms?.full ?? [],
+      apos: props.forms?.apos ?? []
+    };
   }
 
   getLemma(): string {
