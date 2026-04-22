@@ -7,6 +7,7 @@ import { Noun, NounForm, type NounFormName } from './model/noun';
 import type { Emphasizer, Gender, Mutation, Strength } from './features';
 import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from './model/nounPhrase';
 import { Possessive, PossessiveForm, type PossessiveFormName } from './model/possessive';
+import { Preposition, PrepositionForm, type PrepositionFormName } from './model/preposition';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
@@ -477,5 +478,53 @@ export class Repository {
     }
 
     return possessive;
+  }
+
+  getPrepositionByLemma(lemma: string) {
+    const prepositionRaw = this.db.prepare(
+      `SELECT
+        p.preposition_id AS prepositionId,
+        p.disambig AS disambig,
+        p.lemma AS lemma
+      FROM preposition AS p
+      WHERE p.lemma = :lemma`
+    ).get({ lemma });
+    
+    if (prepositionRaw == null)
+      return null;
+
+    const preposition = new Preposition({
+      prepositionId: prepositionRaw.prepositionId as number,
+      disambig: prepositionRaw.disambig as string,
+      lemma: prepositionRaw.lemma as string
+    });
+
+    const formsRaw = this.db.prepare(
+      `SELECT
+        form.preposition_form_id AS prepositionFormId,
+        form.form_name AS formName,
+        form.value AS value
+      FROM
+        preposition_form form
+      WHERE form.preposition_id = :prepositionId`
+    ).all({ prepositionId: preposition.prepositionId });
+
+    for (const formRaw of formsRaw) {
+      const form = {
+        prepositionFormId: formRaw.prepositionFormId as number,
+        formName: formRaw.formName as string,
+        value: formRaw.value as string
+      };
+      preposition.forms[form.formName as PrepositionFormName].push(
+        new PrepositionForm(
+          form.prepositionFormId,
+          preposition.prepositionId,
+          form.formName as PrepositionFormName,
+          form.value
+        )
+      );
+    }
+
+    return preposition;
   }
 }

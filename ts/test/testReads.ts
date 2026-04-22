@@ -62,5 +62,22 @@ repository.initialize().then(async () => {
     assert.equal(possessive.forms.full[0].value, "mo");
     assert.equal(possessive.forms.apos[0].value, "m'");
   });
+
+  test('Test reading preposition data', () => {
+    const preposition = _nn(
+      repository.getPrepositionByLemma("ag"),
+      'Preposition not found'
+    );
+    
+    assert.equal(preposition.getLemma(), "ag");
+    assert.equal(preposition.disambig, "");
+    assert.equal(preposition.forms.sg1[0].value, "agam");
+    assert.equal(preposition.forms.sg2[0].value, "agat");
+    assert.equal(preposition.forms.sg3Masc[0].value, "aige");
+    assert.equal(preposition.forms.sg3Fem[0].value, "aici");
+    assert.equal(preposition.forms.pl1[0].value, "againn");
+    assert.equal(preposition.forms.pl2[0].value, "agaibh");
+    assert.equal(preposition.forms.pl3[0].value, "acu");
+  });
 });
 

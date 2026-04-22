@@ -3,25 +3,27 @@ import type { ILexeme } from "./ILexeme";
 export class Preposition implements ILexeme {
   prepositionId: number;
   disambig: string;
-  forms: { [key in PrepositionFormName]: PrepositionForm[] } = {
-    sg1: [],
-    sg2: [],
-    sg3Masc: [],
-    sg3Fem: [],
-    pl1: [],
-    pl2: [],
-    pl3: []
-  };
+  forms: { [key in PrepositionFormName]: PrepositionForm[] };
   lemma: string;
 
-  constructor(
+  constructor(props: {
     prepositionId: number,
     disambig: string,
-    lemma: string
-  ) {
-    this.prepositionId = prepositionId;
-    this.disambig = disambig;
-    this.lemma = lemma;
+    lemma: string,
+    forms?: { [key in PrepositionFormName]?: PrepositionForm[] }
+  }) {
+    this.prepositionId = props.prepositionId;
+    this.disambig = props.disambig;
+    this.lemma = props.lemma;
+    this.forms = {
+      sg1: props.forms?.sg1 ?? [],
+      sg2: props.forms?.sg2 ?? [],
+      sg3Masc: props.forms?.sg3Masc ?? [],
+      sg3Fem: props.forms?.sg3Fem ?? [],
+      pl1: props.forms?.pl1 ?? [],
+      pl2: props.forms?.pl2 ?? [],
+      pl3: props.forms?.pl3 ?? []
+    };
   }
 
   getLemma(): string {
