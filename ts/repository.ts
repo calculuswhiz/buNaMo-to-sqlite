@@ -8,6 +8,7 @@ import type { Emphasizer, Gender, Mutation, Strength } from './features';
 import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from './model/nounPhrase';
 import { Possessive, PossessiveForm, type PossessiveFormName } from './model/possessive';
 import { Preposition, PrepositionForm, type PrepositionFormName } from './model/preposition';
+import { Verb, VerbForm, type Dependency, type Mood, type Person, type Tense } from './model/verb';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
@@ -489,7 +490,7 @@ export class Repository {
       FROM preposition AS p
       WHERE p.lemma = :lemma`
     ).get({ lemma });
-    
+
     if (prepositionRaw == null)
       return null;
 
@@ -526,5 +527,83 @@ export class Repository {
     }
 
     return preposition;
+  }
+
+  getVerbByLemma(lemma: string) {
+    const foundId = this.db.prepare(
+      `SELECT f.verb_id
+      FROM verb_form AS f 
+      WHERE 
+        (f.tense = 'Pres' AND f.dependency = 'Dep' AND f.person = 'Sg2' AND f.value = :lemma)
+        OR (f.tense = 'Past' AND f.dependency = 'Indep' AND f.person = 'Base' AND f.value = :lemma)`
+    ).all({ lemma }).at(0)?.verb_id;
+    if (foundId == null)
+      return null;
+
+    const verbRaw = this.db.prepare(
+      `SELECT
+        v.verb_id AS verbId,
+        v.disambig AS disambig
+      FROM verb AS v
+      WHERE v.verb_id = :foundId`
+    ).get({ foundId });
+
+    if (verbRaw == null)
+      return null;
+
+    const verb = new Verb({
+      verbId: verbRaw.verbId as number,
+      disambig: verbRaw.disambig as string
+    });
+
+    const formsRaw = this.db.prepare(
+      `SELECT
+        form.verb_form_id AS verbFormId,
+        form.form_type AS formType,
+        form.value AS value,
+        form.tense AS tense,
+        form.dependency AS dependency,
+        form.mood AS mood,
+        form.person AS person
+      FROM
+        verb_form form
+      WHERE form.verb_id = :verbId`
+    ).all({ verbId: foundId });
+
+    for (const formRaw of formsRaw) {
+      const form = {
+        verbFormId: formRaw.verbFormId as number,
+        formType: formRaw.formType as string,
+        value: formRaw.value as string,
+        tense: formRaw.tense as Tense | null,
+        dependency: formRaw.dependency as Dependency | null,
+        mood: formRaw.mood as Mood | null,
+        person: formRaw.person as Person | null
+      };
+
+      const newForm = new VerbForm(
+        form.verbFormId,
+        verb.verbId,
+        form.formType,
+        form.value,
+        form.tense,
+        form.dependency,
+        form.mood,
+        form.person
+      );
+
+      if (form.tense != null && form.dependency != null && form.person != null) {
+        verb.forms.tenses[form.tense][form.dependency][form.person]
+          .push(newForm);
+      } else if (form.mood != null && form.person != null) {
+        verb.forms.moods[form.mood][form.person]
+          .push(newForm);
+      } else {
+        verb.forms[form.formType as 'verbalNoun' | 'verbalAdjective']
+          .push(newForm);
+      }
+    }
+
+    return verb;
   }
 }

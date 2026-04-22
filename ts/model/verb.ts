@@ -49,7 +49,9 @@ export class Verb implements ILexeme {
       Past: tenseFactory(),
       Pres: tenseFactory(),
       Fut: tenseFactory(),
-      Cond: tenseFactory()
+      Cond: tenseFactory(),
+      PastCont: tenseFactory(),
+      PresCont: tenseFactory()
     } as {
         [T in Tense]: {
           [D in Dependency]: {
@@ -67,12 +69,12 @@ export class Verb implements ILexeme {
       }
   };
 
-  constructor(
+  constructor(props: {
     verbId: number,
     disambig: string
-  ) {
-    this.verbId = verbId;
-    this.disambig = disambig;
+  }) {
+    this.verbId = props.verbId;
+    this.disambig = props.disambig;
   }
 
   /** The imperative second-person singular is the lemma.

@@ -79,5 +79,23 @@ repository.initialize().then(async () => {
     assert.equal(preposition.forms.pl2[0].value, "agaibh");
     assert.equal(preposition.forms.pl3[0].value, "acu");
   });
+
+  test('Test reading verb data', () => {
+    const verb = _nn(
+      repository.getVerbByLemma("ól"),
+      'Verb not found'
+    );
+
+    console.log(JSON.stringify(verb, null, 2));
+
+    assert.equal(verb.getLemma(), "ól");
+    assert.equal(verb.disambig, "");
+    assert.equal(verb.forms.verbalNoun[0].value, "ól");
+    assert.equal(verb.forms.verbalAdjective[0].value, "ólta");
+    assert.equal(verb.forms.tenses.PresCont.Indep.Base[0].value, "ólann");
+    assert.equal(verb.forms.tenses.PresCont.Indep.Sg1[0].value, "ólaim");
+
+    // TODO rest of conjugations are not well-mapped
+  });
 });
 
