@@ -25,12 +25,29 @@ repository.initialize().then(async () => {
       repository.getNounByLemma("cat"),
       'Noun not found'
     );
-    
+
     assert.equal(noun.getLemma(), "cat");
     assert.equal(noun.getGender(), "masc");
     assert.equal(noun.forms.sgGen[0].value, "cait");
     assert.equal(noun.forms.plNom[0].value, "cait");
     assert.equal(noun.forms.plGen[0].value, "cat");
+  });
+
+  test('Test reading noun phrase data', () => {
+    const nounPhrase = _nn(
+      repository.getNounPhraseByLemma("fadhb mhór"),
+      'Noun phrase not found'
+    );
+
+    assert.equal(nounPhrase.getLemma(), "fadhb mhór");
+    assert.equal(nounPhrase.getGender(), "fem");
+    assert.equal(nounPhrase.forms.sgGen[0].value, "faidhbe móire");
+    assert.equal(nounPhrase.forms.sgNomArt[0].value, "an fhadhb mhór");
+    assert.equal(nounPhrase.forms.sgGenArt[0].value, "na faidhbe móire");
+    assert.equal(nounPhrase.forms.plNom[0].value, "fadhbanna móra");
+    assert.equal(nounPhrase.forms.plGen[0].value, "fadhbanna móra");
+    assert.equal(nounPhrase.forms.plNomArt[0].value, "na fadhbanna móra");
+    assert.equal(nounPhrase.forms.plGenArt[0].value, "na bhfadhbanna móra");
   });
 });
 

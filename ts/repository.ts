@@ -5,6 +5,7 @@ import path from 'path';
 import { Adjective, AdjectiveForm, type AdjectiveFormName } from './model/adjective';
 import { Noun, NounForm, type NounFormName } from './model/noun';
 import type { Gender, Strength } from './features';
+import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from './model/nounPhrase';
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
@@ -357,5 +358,70 @@ export class Repository {
     }
 
     return noun;
+  }
+
+  getNounPhraseByLemma(lemma: string) {
+    const foundId = this.db.prepare(
+      `SELECT f.noun_phrase_id
+      FROM noun_phrase_form AS f 
+      WHERE f.form_name = 'sgNom' AND f.value = :lemma`
+    ).all({ lemma }).at(0)?.noun_phrase_id;
+    if (foundId == null)
+      return null;
+
+    const nounPhraseRaw = this.db.prepare(
+      `SELECT
+        np.noun_phrase_id AS nounPhraseId,
+        np.is_definite AS isDefinite,
+        np.is_possessed AS isPossessed,
+        np.is_immutable AS isImmutable,
+        np.force_nominative AS forceNominative,
+        np.disambig AS disambig
+      FROM noun_phrase AS np
+      WHERE np.noun_phrase_id = :foundId`
+    ).get({ foundId });
+
+    if (nounPhraseRaw == null)
+      return null;
+
+    const nounPhrase = new NounPhrase({
+      nounPhraseId: nounPhraseRaw.nounPhraseId as number,
+      isDefinite: !!nounPhraseRaw.isDefinite,
+      isPossessed: !!nounPhraseRaw.isPossessed,
+      isImmutable: !!nounPhraseRaw.isImmutable,
+      forceNominative: !!nounPhraseRaw.forceNominative,
+      disambig: nounPhraseRaw.disambig as string
+    });
+
+    const formsRaw = this.db.prepare(
+      `SELECT
+        form.noun_phrase_form_id AS nounPhraseFormId,
+        form.form_name AS formName,
+        form.value AS value,
+        form.gender AS gender
+      FROM
+        noun_phrase_form form
+      WHERE form.noun_phrase_id = :foundId`
+    ).all({ foundId });
+
+    for (const formRaw of formsRaw) {
+      const form = {
+        nounPhraseFormId: formRaw.nounPhraseFormId as number,
+        formName: formRaw.formName as string,
+        value: formRaw.value as string,
+        gender: formRaw.gender as string | null
+      };
+      nounPhrase.forms[form.formName as NounPhraseFormName].push(
+        new NounPhraseForm(
+          form.nounPhraseFormId,
+          nounPhrase.nounPhraseId,
+          form.formName as NounPhraseFormName,
+          form.value,
+          form.gender as Gender | null
+        )
+      );
+    }
+
+    return nounPhrase;
   }
 }

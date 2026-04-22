@@ -9,36 +9,38 @@ export class NounPhrase implements ILexeme {
   forceNominative: boolean;
   disambig: string;
 
-  forms: { [key in NounPhraseFormName]: NounPhraseForm[] } = {
-    sgNom: [],
-    sgGen: [],
-    sgNomArt: [],
-    sgGenArt: [],
-    sgDat: [],
-    sgDatArtN: [],
-    sgDatArtS: [],
-    plNom: [],
-    plGen: [],
-    plNomArt: [],
-    plGenArt: [],
-    plDat: [],
-    plDatArt: []
-  }
+  forms: { [key in NounPhraseFormName]: NounPhraseForm[] };
 
-  constructor(
+  constructor(props: {
     nounPhraseId: number,
     isDefinite: boolean,
     isPossessed: boolean,
     isImmutable: boolean,
     forceNominative: boolean,
-    disambig: string
-  ) {
-    this.nounPhraseId = nounPhraseId;
-    this.isDefinite = isDefinite;
-    this.isPossessed = isPossessed;
-    this.isImmutable = isImmutable;
-    this.forceNominative = forceNominative;
-    this.disambig = disambig;
+    disambig: string,
+    forms?: { [key in NounPhraseFormName]?: NounPhraseForm[] }
+  }) {
+    this.nounPhraseId = props.nounPhraseId;
+    this.isDefinite = props.isDefinite;
+    this.isPossessed = props.isPossessed;
+    this.isImmutable = props.isImmutable;
+    this.forceNominative = props.forceNominative;
+    this.disambig = props.disambig;
+    this.forms = {
+      sgNom: props.forms?.sgNom ?? [],
+      sgGen: props.forms?.sgGen ?? [],
+      sgNomArt: props.forms?.sgNomArt ?? [],
+      sgGenArt: props.forms?.sgGenArt ?? [],
+      sgDat: props.forms?.sgDat ?? [],
+      sgDatArtN: props.forms?.sgDatArtN ?? [],
+      sgDatArtS: props.forms?.sgDatArtS ?? [],
+      plNom: props.forms?.plNom ?? [],
+      plGen: props.forms?.plGen ?? [],
+      plNomArt: props.forms?.plNomArt ?? [],
+      plGenArt: props.forms?.plGenArt ?? [],
+      plDat: props.forms?.plDat ?? [],
+      plDatArt: props.forms?.plDatArt ?? []
+    };
   }
 
   getLemma(): string {
