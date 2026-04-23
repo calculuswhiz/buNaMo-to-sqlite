@@ -9,7 +9,7 @@ const repository = new Repository(db);
 repository.initialize().then(async () => {
   test('Test reading adjective data', () => {
     const adjective = _nn(
-      repository.getAdjectiveByLemma("féasógach"),
+      repository.getAdjectivesByLemma("féasógach")[0],
       'Adjective not found'
     );
     assert.equal(adjective.getLemma(), "féasógach");
@@ -22,7 +22,7 @@ repository.initialize().then(async () => {
 
   test('Test reading noun data', () => {
     const noun = _nn(
-      repository.getNounByLemma("cat"),
+      repository.getNounsByLemma("cat")[0],
       'Noun not found'
     );
 
@@ -35,7 +35,7 @@ repository.initialize().then(async () => {
 
   test('Test reading noun phrase data', () => {
     const nounPhrase = _nn(
-      repository.getNounPhraseByLemma("fadhb mhór"),
+      repository.getNounPhrasesByLemma("fadhb mhór")[0],
       'Noun phrase not found'
     );
 
@@ -52,7 +52,7 @@ repository.initialize().then(async () => {
   
   test('Test reading possessive data', () => {
     const possessive = _nn(
-      repository.getPossessiveByLemma("mo"),
+      repository.getPossessivesByLemma("mo")[0],
       'Possessive not found'
     );
     
@@ -65,7 +65,7 @@ repository.initialize().then(async () => {
 
   test('Test reading preposition data', () => {
     const preposition = _nn(
-      repository.getPrepositionByLemma("ag"),
+      repository.getPrepositionsByLemma("ag")[0],
       'Preposition not found'
     );
     
@@ -82,11 +82,11 @@ repository.initialize().then(async () => {
 
   test('Test reading verb data', () => {
     const verb = _nn(
-      repository.getVerbByLemma("ól"),
+      repository.getVerbsByLemma("ól")[0],
       'Verb not found'
     );
 
-    console.log(JSON.stringify(verb, null, 2));
+    // console.log(JSON.stringify(verb, null, 2));
 
     assert.equal(verb.getLemma(), "ól");
     assert.equal(verb.disambig, "");
