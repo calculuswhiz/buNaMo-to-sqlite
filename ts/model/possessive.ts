@@ -6,6 +6,7 @@ export class Possessive implements ILexeme {
   mutation: Mutation;
   emphasizer: Emphasizer;
   disambig: string;
+  lemma: string;
 
   forms: { [key in PossessiveFormName]: PossessiveForm[] };
 
@@ -14,12 +15,14 @@ export class Possessive implements ILexeme {
     mutation: Mutation,
     emphasizer: Emphasizer,
     disambig: string,
+    lemma: string,
     forms?: { [key in PossessiveFormName]?: PossessiveForm[] }
   }) {
     this.possessiveId = props.possessiveId;
     this.mutation = props.mutation;
     this.emphasizer = props.emphasizer;
     this.disambig = props.disambig;
+    this.lemma = props.lemma;
     this.forms = {
       full: props.forms?.full ?? [],
       apos: props.forms?.apos ?? []
@@ -27,7 +30,7 @@ export class Possessive implements ILexeme {
   }
 
   getLemma(): string {
-    return this.forms.full[0]?.value ?? "";
+    return this.lemma;
   }
 
   getNickname(): string {

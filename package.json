@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsx ts/build.ts",
-    "rebuild": "tsx ts/build.ts --rebuild"
+    "rebuild": "tsx ts/build.ts --rebuild",
+    "testReads": "tsx ts/test/testReads.ts"
   },
   "dependencies": {
     "@types/node": "^25.6.0",

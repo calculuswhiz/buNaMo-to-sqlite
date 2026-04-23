@@ -86,8 +86,6 @@ repository.initialize().then(async () => {
       'Verb not found'
     );
 
-    // console.log(JSON.stringify(verb, null, 2));
-
     assert.equal(verb.getLemma(), "ól");
     assert.equal(verb.disambig, "");
     assert.equal(verb.forms.verbalNoun[0].value, "ól");

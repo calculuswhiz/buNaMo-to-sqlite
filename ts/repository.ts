@@ -12,6 +12,10 @@ import { Verb, VerbForm, type Dependency, type Mood, type Person, type Tense } f
 
 const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
 
+/** Initialize a new database with the default schema.
+ * @param clean Optionally specify to delete existing database file before creating a new one
+ * @param outFile The path to the database file
+ */
 export async function initializeDefaultDb(clean: boolean, outFile: string) {
   if (clean)
     await fs.rm(outFile, { force: true });
@@ -21,11 +25,13 @@ export async function initializeDefaultDb(clean: boolean, outFile: string) {
   return db;
 }
 
+/** Initialize db from existing file */
 export function getExistingDb(outFile: string) {
   const db = new DatabaseSync(outFile);
   return db;
 }
 
+/** Abstractions around BuNaMo database operations. */
 export class Repository {
   db: DatabaseSync;
 
@@ -88,7 +94,7 @@ export class Repository {
     }
   }
 
-  // Insertion API. Always returns ID of the inserted row
+  // #region Insertion API. Always returns ID of the inserted row
 
   insertNoun(
     declension: number,
@@ -110,6 +116,17 @@ export class Repository {
     ).lastInsertRowid as number;
   }
 
+  insertNounUsingProps(props: Noun) {
+    return this.insertNoun(
+      props.declension,
+      props.isProper,
+      props.isImmutable,
+      props.isDefinite,
+      props.allowArticledGenitive,
+      props.disambig
+    );
+  }
+
   insertNounForm(
     nounId: number,
     formName: string,
@@ -124,6 +141,16 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
+  insertNounFormUsingProps(props: NounForm) {
+    return this.insertNounForm(
+      props.nounId,
+      props.formName,
+      props.value,
+      props.gender,
+      props.strength
+    );
+  }
+
   insertNounPhrase(
     isDefinite: boolean,
     isPossessed: boolean,
@@ -135,6 +162,25 @@ export class Repository {
       uninitializedErrorMessage
     ).run(+isDefinite, +isPossessed, +isImmutable, +forceNominative, disambig)
       .lastInsertRowid as number;
+  }
+
+  insertNounPhraseUsingProps(props: NounPhrase) {
+    return this.insertNounPhrase(
+      props.isDefinite,
+      props.isPossessed,
+      props.isImmutable,
+      props.forceNominative,
+      props.disambig
+    );
+  }
+
+  insertNounPhraseFormUsingProps(props: NounPhraseForm) {
+    return this.insertNounPhraseForm(
+      props.nounPhraseId,
+      props.formName,
+      props.value,
+      props.gender
+    );
   }
 
   insertNounPhraseForm(
@@ -158,6 +204,14 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
+  insertAdjectiveUsingProps(props: Adjective) {
+    return this.insertAdjective(
+      props.declension,
+      props.isPre,
+      props.disambig
+    );
+  }
+
   insertAdjectiveForm(
     adjectiveId: number,
     formName: string,
@@ -169,11 +223,23 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
+  insertAdjectiveFormUsingProps(props: AdjectiveForm) {
+    return this.insertAdjectiveForm(
+      props.adjectiveId,
+      props.formName,
+      props.value
+    );
+  }
+
   insertVerb(disambig: string) {
     return _nn(
       this.inserters.insertVerb, uninitializedErrorMessage
     ).run(disambig)
       .lastInsertRowid as number;
+  }
+
+  insertVerbUsingProps(props: Verb) {
+    return this.insertVerb(props.disambig);
   }
 
   insertVerbForm(
@@ -191,11 +257,27 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
+  insertVerbFormUsingProps(props: VerbForm) {
+    return this.insertVerbForm(
+      props.verbId,
+      props.formType,
+      props.value,
+      props.tense,
+      props.dependency,
+      props.mood,
+      props.person
+    );
+  }
+
   insertPreposition(disambig: string, lemma: string) {
     return _nn(
       this.inserters.insertPreposition, uninitializedErrorMessage
     ).run(disambig, lemma)
       .lastInsertRowid as number;
+  }
+
+  insertPrepositionUsingProps(props: Preposition) {
+    return this.insertPreposition(props.disambig, props.lemma);
   }
 
   insertPrepositionForm(
@@ -207,6 +289,14 @@ export class Repository {
       this.inserters.insertPrepositionForm, uninitializedErrorMessage
     ).run(prepositionId, formName, value)
       .lastInsertRowid as number;
+  }
+
+  insertPrepositionFormUsingProps(props: PrepositionForm) {
+    return this.insertPrepositionForm(
+      props.prepositionId,
+      props.formName,
+      props.value
+    );
   }
 
   insertPossessive(
@@ -221,6 +311,15 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
+  insertPossessiveUsingProps(props: Possessive) {
+    return this.insertPossessive(
+      props.mutation,
+      props.emphasizer,
+      props.disambig,
+      props.lemma
+    );
+  }
+
   insertPossessiveForm(
     possessiveId: number,
     formName: string,
@@ -232,29 +331,26 @@ export class Repository {
       .lastInsertRowid as number;
   }
 
-  // Retrieval API. Don't try to support everything. 
+  insertPossessiveFormUsingProps(props: PossessiveForm) {
+    return this.insertPossessiveForm(
+      props.possessiveId,
+      props.formName,
+      props.value
+    );
+  }
+
+  // #endregion
+
+  // #region Retrieval API. Don't try to support everything. 
   // You can always write custom SQL if you need it.
 
   getAdjectivesByLemma(lemma: string) {
-    const rawAdjectives = this.db.prepare(
-      `SELECT
-        adj.adjective_id AS adjectiveId,
-        adj.declension AS declension,
-        adj.is_pre AS isPre,
-        adj.disambig AS disambig
-      FROM adjective AS adj
-      JOIN adjective_form AS form ON form.adjective_id = adj.adjective_id
-      WHERE form.form_name = 'sgNom' AND form.value = :lemma`
+    const rawAdjectives = _nn(
+      this.readers.getAdjectives, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-        form.adjective_form_id AS adjectiveFormId,
-        form.form_name AS formName,
-        form.value AS value
-      FROM
-        adjective_form form
-      WHERE form.adjective_id = :foundId`
+    const formsQuery = _nn(
+      this.readers.getAdjectiveForms, uninitializedErrorMessage
     );
 
     const adjectives: Adjective[] = [];
@@ -291,31 +387,11 @@ export class Repository {
   }
 
   getNounsByLemma(lemma: string) {
-    const rawNouns = this.db.prepare(
-      `SELECT
-        n.noun_id AS nounId,
-        n.declension AS declension,
-        n.is_proper AS isProper,
-        n.is_immutable AS isImmutable,
-        n.is_definite AS isDefinite,
-        n.allow_articled_genitive AS allowArticledGenitive,
-        n.disambig AS disambig
-      FROM noun AS n
-      JOIN noun_form AS form ON form.noun_id = n.noun_id
-      WHERE form.form_name = 'sgNom' AND form.value = :lemma`
+    const rawNouns = _nn(
+      this.readers.getNouns, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-        form.noun_form_id AS nounFormId,
-        form.form_name AS formName,
-        form.value AS value,
-        form.gender AS gender,
-        form.strength AS strength
-      FROM
-        noun_form form
-      WHERE form.noun_id = :foundId`
-    );
+    const formsQuery = _nn(this.readers.getNounForms, uninitializedErrorMessage);
 
     const nouns: Noun[] = [];
     for (const rawNoun of rawNouns) {
@@ -358,29 +434,13 @@ export class Repository {
   }
 
   getNounPhrasesByLemma(lemma: string) {
-    const rawNounPhrases = this.db.prepare(
-      `SELECT
-        np.noun_phrase_id AS nounPhraseId,
-        np.is_definite AS isDefinite,
-        np.is_possessed AS isPossessed,
-        np.is_immutable AS isImmutable,
-        np.force_nominative AS forceNominative,
-        np.disambig AS disambig
-      FROM noun_phrase AS np
-      JOIN noun_phrase_form AS form ON form.noun_phrase_id = np.noun_phrase_id
-      WHERE form.form_name = 'sgNom' AND form.value = :lemma`
+    const rawNounPhrases = _nn(
+      this.readers.getNounPhrases, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-          form.noun_phrase_form_id AS nounPhraseFormId,
-          form.form_name AS formName,
-          form.value AS value,
-          form.gender AS gender
-        FROM
-          noun_phrase_form form
-        WHERE form.noun_phrase_id = :foundId`
-    );
+      const formsQuery = _nn(
+        this.readers.getNounPhraseForms, uninitializedErrorMessage
+      );
 
     const nounPhrases: NounPhrase[] = [];
     for (const rawNounPhrase of rawNounPhrases) {
@@ -420,26 +480,12 @@ export class Repository {
   }
 
   getPossessivesByLemma(lemma: string) {
-    const rawPossessives = this.db.prepare(
-      `SELECT
-        p.possessive_id AS possessiveId,
-        p.mutation AS mutation,
-        p.emphasizer AS emphasizer,
-        p.disambig AS disambig,
-        p.lemma AS lemma
-      FROM possessive AS p
-      JOIN possessive_form AS form ON form.possessive_id = p.possessive_id
-      WHERE p.lemma = :lemma`
+    const rawPossessives = _nn(
+      this.readers.getPossessives, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-          form.possessive_form_id AS possessiveFormId,
-          form.form_name AS formName,
-          form.value AS value
-        FROM
-          possessive_form form
-        WHERE form.possessive_id = :foundId`
+    const formsQuery = _nn(
+      this.readers.getPossessiveForms, uninitializedErrorMessage
     );
 
     const possessives: Possessive[] = [];
@@ -448,7 +494,8 @@ export class Repository {
         possessiveId: rawPossessive.possessiveId as number,
         mutation: rawPossessive.mutation as Mutation,
         emphasizer: rawPossessive.emphasizer as Emphasizer,
-        disambig: rawPossessive.disambig as string
+        disambig: rawPossessive.disambig as string,
+        lemma: rawPossessive.lemma as string
       });
 
       possessives.push(possessive);
@@ -476,24 +523,12 @@ export class Repository {
   }
 
   getPrepositionsByLemma(lemma: string) {
-    const rawPrepositions = this.db.prepare(
-      `SELECT
-        p.preposition_id AS prepositionId,
-        p.disambig AS disambig,
-        p.lemma AS lemma
-      FROM preposition AS p
-      JOIN preposition_form AS form ON form.preposition_id = p.preposition_id
-      WHERE p.lemma = :lemma`
+    const rawPrepositions = _nn(
+      this.readers.getPrepositions, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-          form.preposition_form_id AS prepositionFormId,
-          form.form_name AS formName,
-          form.value AS value
-        FROM
-          preposition_form form
-        WHERE form.preposition_id = :foundId`
+    const formsQuery = _nn(
+      this.readers.getPrepositionForms, uninitializedErrorMessage
     );
 
     const prepositions: Preposition[] = [];
@@ -529,29 +564,12 @@ export class Repository {
   }
 
   getVerbsByLemma(lemma: string) {
-    const foundVerbs = this.db.prepare(
-      `SELECT
-        v.verb_id AS verbId,
-        v.disambig AS disambig
-      FROM verb AS v
-      JOIN verb_form AS f ON f.verb_id = v.verb_id
-      WHERE
-        (f.tense = 'Pres' AND f.dependency = 'Dep' AND f.person = 'Sg2' AND f.value = :lemma)
-          OR (f.tense = 'Past' AND f.dependency = 'Indep' AND f.person = 'Base' AND f.value = :lemma)`
+    const foundVerbs = _nn(
+      this.readers.getVerbs, uninitializedErrorMessage
     ).all({ lemma });
 
-    const formsQuery = this.db.prepare(
-      `SELECT
-        form.verb_form_id AS verbFormId,
-        form.form_type AS formType,
-        form.value AS value,
-        form.tense AS tense,
-        form.dependency AS dependency,
-        form.mood AS mood,
-        form.person AS person
-      FROM
-        verb_form form
-      WHERE form.verb_id = :verbId`
+    const formsQuery = _nn(
+      this.readers.getVerbForms, uninitializedErrorMessage
     );
 
     const verbs: Verb[] = [];
@@ -603,4 +621,6 @@ export class Repository {
 
     return verbs;
   }
+
+  // #endregion
 }

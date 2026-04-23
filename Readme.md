@@ -35,11 +35,18 @@ npm run rebuild
 
 This creates `buNaMo.sqlite` in the output directory.
 
+### Repository
+
+The `repository.ts` file contains TypeScript code for working with the database. It provides methods for querying the database and retrieving data in a structured format (see **ts/model** for the data models).
+
+It also contains the queries used to build the database, which are organized by category in the **sql** folder.
+
 ## Structure
 
-- Main entrypoint is in `main.ts`, which initializes the database and runs the conversion.
 - The schema files is in `sql/Schema.sql`, and prepared statments are organized by category in the folder.
-- The database abstractions are in `repository.ts`.
+- TypeScript files are in the **ts** folder
+  - Main entrypoint is in `main.ts`, which initializes the database and runs the conversion.
+  - The database abstractions are in `repository.ts`.
 
 ## Affiliation
 
