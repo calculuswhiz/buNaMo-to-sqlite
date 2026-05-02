@@ -4,28 +4,23 @@ import type { Mutation } from "../features";
 
 // NOTE: Gramadan includes the "Any" type, but it was only useful for the enumeration model there.
 
-/**
- * Past - Normal past tense
- * PastCont - Past habitual
- * Pres - Present tense
- * PresCont - Present habitual
- * Fut - Future
- * Cond - Conditional
- */
-export const VPTenses = ['Past', 'PastCont', 'Pres', 'PresCont', 'Fut', 'Cond'] as const;
+export const VPTenses = ['Past', 'PastHab', 'Pres', 'PresHab', 'Fut'] as const;
 export type VPTense = typeof VPTenses[number];
 
-/** Imperative and subjunctive moods. 
+/** Indicative, imperative, subjunctive, and conditional moods. 
  * While there is an indicative mood, it is not represented explicitly in the data.
  * If it has a tense, it is considered indicative.
  */
-export const VPMoods = ['Imper', 'Subj'] as const;
+export const VPMoods = ['Ind', 'Imper', 'Subj', 'Cond'] as const;
 export type VPMood = typeof VPMoods[number];
 
 export const VPShapes = ['Declar', 'Interrog'] as const;
 export type VPShape = typeof VPShapes[number];
 
-export const VPPersons = ['Sg1', 'Sg2', 'Sg3Masc', 'Sg3Fem', 'Pl1', 'Pl2', 'Pl3', 'NoSubject', 'Auto'] as const;
+export const VPPersons = [
+  'Sg1', 'Sg2', 'Sg3Masc', 'Sg3Fem', 'Pl1', 'Pl2', 'Pl3',
+  'NoSubject', 'Auto'
+] as const;
 export type VPPerson = typeof VPPersons[number];
 
 export const VPPolarities = ['Pos', 'Neg'] as const;
@@ -73,7 +68,7 @@ export const indicativeParticles:
       Neg: ["nach", "ecl1"],
     }
   },
-  PresCont: {
+  PresHab: {
     Declar: {
       Pos: ["", "none"],
       Neg: ["ní", "len1"],
@@ -93,7 +88,7 @@ export const indicativeParticles:
       Neg: ["nach", "ecl1"],
     }
   },
-  Cond: {
+  PastHab: {
     Declar: {
       Pos: ["", "len1D"],
       Neg: ["ní", "len1"],
@@ -102,16 +97,21 @@ export const indicativeParticles:
       Pos: ["an", "ecl1x"],
       Neg: ["nach", "ecl1"],
     }
+  }
+};
+
+export const conditionalParticles: Record<
+  VPShape, Record<
+    VPPolarity, [string, Mutation]
+  >
+> = {
+  Declar: {
+    Pos: ["", "none"],
+    Neg: ["ní", "len1"],
   },
-  PastCont: {
-    Declar: {
-      Pos: ["", "len1D"],
-      Neg: ["ní", "len1"],
-    },
-    Interrog: {
-      Pos: ["an", "ecl1x"],
-      Neg: ["nach", "ecl1"],
-    }
+  Interrog: {
+    Pos: ["an", "ecl1x"],
+    Neg: ["nach", "ecl1"],
   }
 };
 

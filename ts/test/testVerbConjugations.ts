@@ -17,7 +17,7 @@ repository.initialize().then(async () => {
     await test("Verb in first conjugation", () => {
       const verb = getVerb("mol");
 
-      console.log(verb.conjugateRule(null, "PresCont", "Declar", "Pos", "Indep", "Sg1"));
+      console.log(verb.conjugateRule(null, "Pres", "Declar", "Pos", "Indep", "Sg1"));
       // TODO Work cannot continue until the DB schema is corrected
     });
   });

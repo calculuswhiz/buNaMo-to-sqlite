@@ -248,7 +248,7 @@ export class Repository {
     value: string,
     tense: string | null,
     dependency: string | null,
-    mood: string | null,
+    mood: string,
     person: string | null
   ) {
     return _nn(
@@ -438,9 +438,9 @@ export class Repository {
       this.readers.getNounPhrases, uninitializedErrorMessage
     ).all({ lemma });
 
-      const formsQuery = _nn(
-        this.readers.getNounPhraseForms, uninitializedErrorMessage
-      );
+    const formsQuery = _nn(
+      this.readers.getNounPhraseForms, uninitializedErrorMessage
+    );
 
     const nounPhrases: NounPhrase[] = [];
     for (const rawNounPhrase of rawNounPhrases) {
@@ -591,7 +591,7 @@ export class Repository {
           value: formRaw.value as string,
           tense: formRaw.tense as Tense | null,
           dependency: formRaw.dependency as Dependency | null,
-          mood: formRaw.mood as Mood | null,
+          mood: formRaw.mood as Mood,
           person: formRaw.person as Person | null
         };
 

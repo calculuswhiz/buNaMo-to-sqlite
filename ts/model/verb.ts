@@ -9,7 +9,8 @@ import {
   VPPolarities,
   VPShapes,
   VPTenses,
-  VerbPhrase, type VPMood, type VPPerson, type VPPolarity, type VPShape, type VPTense
+  VerbPhrase, type VPMood, type VPPerson, type VPPolarity, type VPShape, type VPTense,
+  conditionalParticles
 } from "./verbPhrase";
 
 function tenseFactory(): {
@@ -74,10 +75,12 @@ export class Verb implements ILexeme {
       Pres: tenseFactory(),
       Fut: tenseFactory(),
       Cond: tenseFactory(),
-      PastCont: tenseFactory(),
-      PresCont: tenseFactory()
+      PastHab: tenseFactory(),
+      PresHab: tenseFactory()
     } as { [T in Tense]: ReturnType<typeof tenseFactory> },
     moods: {
+      Ind: moodFactory(),
+      Cond: moodFactory(),
       Imper: moodFactory(),
       Subj: moodFactory()
     } as { [M in Mood]: ReturnType<typeof moodFactory> }
@@ -124,7 +127,7 @@ export class Verb implements ILexeme {
       : person === "NoSubject"
         ? "Base"
         : person;
-    if (mood === null && tense != null) {
+    if (mood === 'Ind' && tense != null) {
       const [particle, mutation] = indicativeParticles[tense][shape][polarity];
       const rule = new ConjugationRule({
         mood: null,
@@ -208,9 +211,6 @@ export class Verb implements ILexeme {
               rule.mutation = "ecl1";
               rule.particle = "nach";
             }
-          } else if (tense === "Cond" && shape === "Declar" && polarity === "Neg") {
-            rule.mutation = "ecl1";
-            rule.particle = "ní";
           }
           break;
         case "feic":
@@ -261,6 +261,22 @@ export class Verb implements ILexeme {
           break;
       }
 
+      return [rule].map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
+    } else if (mood === 'Cond') {
+      const [particle, mutation] = conditionalParticles[shape][polarity];
+      const rule = new ConjugationRule({
+        mood: null,
+        tense,
+        dependency,
+        person: adaptedPerson,
+        particle,
+        mutation,
+        pronoun
+      });
+      if (this.getLemma() === "faigh" && shape === "Declar" && polarity === "Neg") {
+        rule.mutation = "ecl1";
+        rule.particle = "ní";
+      }
       return [rule].map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
     } else if (mood === "Imper") {
       const [particle, mutation] = imperativeParticles[polarity];
@@ -395,7 +411,7 @@ export class VerbForm {
   value: string;
   tense: Tense | null;
   dependency: Dependency | null;
-  mood: Mood | null;
+  mood: Mood;
   person: Person | null;
 
   constructor(
@@ -405,7 +421,7 @@ export class VerbForm {
     value: string,
     tense: Tense | null,
     dependency: Dependency | null,
-    mood: Mood | null,
+    mood: Mood,
     person: Person | null
   ) {
     this.verbFormId = verbFormId;

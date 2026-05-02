@@ -185,11 +185,10 @@ CREATE TABLE
     tense TEXT CHECK (
       tense IN (
         'Past',
-        'PastCont',
+        'PastHab',
         'Pres',
-        'PresCont',
-        'Fut',
-        'Cond'
+        'PresHab',
+        'Fut'
       )
       OR tense IS NULL
     ),
@@ -198,8 +197,7 @@ CREATE TABLE
       OR dependency IS NULL
     ),
     mood TEXT CHECK (
-      mood IN ('Imper', 'Subj')
-      OR mood IS NULL
+      mood IN ('Ind', 'Cond', 'Imper', 'Subj')
     ),
     person TEXT CHECK (
       person IN (

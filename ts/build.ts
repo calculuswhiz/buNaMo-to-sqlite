@@ -297,6 +297,8 @@ async function processVerbs(repository: Repository) {
       const verbId = repository.insertVerb(
         verb.$.disambig ?? ''
       );
+      // Note: Do not rely on file name comparisons. Unicode characters cause issues with string comparisons.
+      const isBí = verb.$.default === "bí";
 
       for (const [formKey, formValue] of Object.entries(verb)) {
         // Skip attributes
@@ -314,13 +316,31 @@ async function processVerbs(repository: Repository) {
         }[];
 
         for (const form of forms) {
+          // Corrective action: "Cond" is not a tense, but a mood.
+          const isConditional = form.$.tense === "Cond";
+
+          const tense = isConditional
+            ? null
+            : (isBí
+              // Corrective action: "Cont" -> "Hab" for "Habitual"
+              ? (form.$.tense?.replace("Cont", "Hab") ?? null)
+              // Corrective action: Verbs other than "bí" have "Pres" tenses mislabeled as "PresCont"
+              : (form.$.tense
+                ?.replace("PresCont", "Pres")
+                .replace("PastCont", "PastHab") ?? null));
+
+          const mood = isConditional
+            ? "Cond"
+            // Corrective action: null mood should be "Ind" (indicative)
+            : form.$.mood ?? "Ind";
+
           repository.insertVerbForm(
             verbId,
             formKey,
             form.$.default,
-            form.$.tense ?? null,
+            tense,
             form.$.dependency ?? null,
-            form.$.mood ?? null,
+            mood,
             form.$.person ?? null
           );
         }
