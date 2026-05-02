@@ -46,7 +46,7 @@ export class Possessive implements ILexeme {
   }
 }
 
-export type PossessiveFormName = 'full' | 'apos';
+export type PossessiveFormName = "full" | "apos";
 
 export class PossessiveForm {
   possessiveFormId: number;

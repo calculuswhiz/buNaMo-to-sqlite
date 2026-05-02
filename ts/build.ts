@@ -2,7 +2,7 @@ import xml2js from "xml2js";
 import fs from "fs/promises";
 import { initializeDefaultDb, Repository } from "./repository";
 
-async function parseXmlFile(filePath: string): Promise<any> {
+async function parseXmlFile(filePath: string) {
   const xmlData = await fs.readFile(filePath, "utf-8");
   return xml2js.parseStringPromise(xmlData);
 }

@@ -67,12 +67,12 @@ export class NounPhrase implements ILexeme {
   }
 }
 
-export type NounPhraseFormName = 'sgNom' | 'sgGen' |
-  'sgNomArt' | 'sgGenArt' |
-  'sgDat' | 'sgDatArtN' | 'sgDatArtS' |
-  'plNom' | 'plGen' |
-  'plNomArt' | 'plGenArt' |
-  'plDat' | 'plDatArt';
+export type NounPhraseFormName = "sgNom" | "sgGen" |
+  "sgNomArt" | "sgGenArt" |
+  "sgDat" | "sgDatArtN" | "sgDatArtS" |
+  "plNom" | "plGen" |
+  "plNomArt" | "plGenArt" |
+  "plDat" | "plDatArt";
 
 export class NounPhraseForm {
   nounPhraseFormId: number;

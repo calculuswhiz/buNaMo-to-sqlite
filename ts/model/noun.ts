@@ -68,9 +68,9 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
   // TODO Implement AddDative
 }
 
-export type NounFormName = 'sgNom' | 'sgGen' | 'sgVoc' | 'sgDat'
-  | 'plNom' | 'plGen' | 'plVoc'
-  | 'count';
+export type NounFormName = "sgNom" | "sgGen" | "sgVoc" | "sgDat"
+  | "plNom" | "plGen" | "plVoc"
+  | "count";
 
 export class NounForm {
   nounFormId: number;

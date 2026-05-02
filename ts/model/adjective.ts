@@ -81,9 +81,9 @@ export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
       if (/^[aeiouáéíóú]/i.test(gradedForm.value))
         forms.push("ní b'" + gradedForm.value);
       else if (/^f[aeiouáéíóú]/i.test(gradedForm.value))
-        forms.push("ní b'" + mutate('len1', gradedForm.value));
+        forms.push("ní b'" + mutate("len1", gradedForm.value));
       else
-        forms.push("ní ba " + mutate('len1', gradedForm.value));
+        forms.push("ní ba " + mutate("len1", gradedForm.value));
     }
     return forms;
   }
@@ -96,21 +96,21 @@ export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
         forms.push("ab " + gradedForm.value);
       // Possible typo? Original not case sensitive
       else if (/^f/.test(gradedForm.value))
-        forms.push("ab " + mutate('len1', gradedForm.value));
+        forms.push("ab " + mutate("len1", gradedForm.value));
       else
-        forms.push("ba " + mutate('len1', gradedForm.value));
+        forms.push("ba " + mutate("len1", gradedForm.value));
     }
     return forms;
   }
 }
 
 export type AdjectiveFormName =
-  'sgNom' |
-  'sgGenMasc' | 'sgGenFem' |
-  'sgVocMasc' | 'sgVocFem' |
-  'plNom' |
-  'graded' |
-  'abstractNoun';
+  "sgNom" |
+  "sgGenMasc" | "sgGenFem" |
+  "sgVocMasc" | "sgVocFem" |
+  "plNom" |
+  "graded" |
+  "abstractNoun";
 
 export class AdjectiveForm {
   adjectiveFormId: number;

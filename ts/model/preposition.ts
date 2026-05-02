@@ -41,8 +41,8 @@ export class Preposition implements ILexeme {
   }
 }
 
-export type PrepositionFormName = 'sg1' | 'sg2' | 'sg3Masc' | 'sg3Fem' |
-  'pl1' | 'pl2' | 'pl3';
+export type PrepositionFormName = "sg1" | "sg2" | "sg3Masc" | "sg3Fem" |
+  "pl1" | "pl2" | "pl3";
 
 export class PrepositionForm {
   prepositionFormId: number;

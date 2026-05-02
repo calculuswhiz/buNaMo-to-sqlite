@@ -15,6 +15,16 @@ Contains:
 
 See **sql/Schema.sql** for the database schema.
 
+### Differences between the original BuNaMo data and the sqlite database
+
+There are a few breaking changes if you are used to working with the original BuNaMo data:
+
+- Conditional is represented as a mood, not a tense.
+- `PastCont` renamed to `PastHab` for Past Habitual
+- `PresCont` renamed to `PresHab` and is not used as the default present tense
+- Instead, `Pres` is used for this purpose, and `PresHab` is used for present habitual.
+- Indicative mood is explicitly represented as `Ind` instead of null.
+
 ## Usage
 
 ### Converter
