@@ -99,7 +99,7 @@ export const indicativeParticles =
 
 export const conditionalParticles = {
   Declar: {
-    Pos: ["", "none"],
+    Pos: ["", "len1D"],
     Neg: ["ní", "len1"],
   },
   Interrog: {

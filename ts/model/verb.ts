@@ -1,4 +1,4 @@
-import { err, ok, type Err, type Ok } from "../neverEverThrow";
+import { err, ok, type Result } from "../neverEverThrow";
 import type { Mutation } from "../features";
 import { mutate } from "../mutators";
 import type { ILexeme } from "./ILexeme";
@@ -106,7 +106,7 @@ export class Verb implements ILexeme {
   /** Conjugate a verb according to the specified rules 
    * @returns an array of conjugation rules, as some verb forms may have multiple valid conjugations.
    * E.g. Synthetic and analytic forms
-   * 
+   * If an analytic form exists with a synthetic form, it will always come first.
    * TODO Standard doesn't mention "siad" form. Look into it.
    * 
   */
@@ -117,7 +117,7 @@ export class Verb implements ILexeme {
     polarity: VPPolarity,
     dependency: Dependency | null,
     person: VPPerson
-  ): VerbPhrase[] {
+  ): Result<VerbPhrase[], Error> {
     const adaptedPerson: Person = person === "Sg3Masc" || person === "Sg3Fem"
       ? "Sg3"
       : person === "NoSubject"
@@ -135,8 +135,11 @@ export class Verb implements ILexeme {
       switch (tense) {
         case "Past":
           rules.push(new ConjugationRule({
-            mood, tense, dependency, particle, mutation,
-            person: "Base", pronoun: defaultPronoun
+            mood, tense, dependency, particle,
+            // The Autonomus form does NOT lenite
+            mutation: adaptedPerson === "Auto" ? "none" : "len1D",
+            person: adaptedPerson === "Auto" ? "Auto" : "Base",
+            pronoun: defaultPronoun
           }));
           if (person === "Pl1" || person === "Pl3") {
             rules.push(new ConjugationRule({
@@ -146,14 +149,28 @@ export class Verb implements ILexeme {
           }
           break;
         case "Pres":
-          rules.push(new ConjugationRule({
-            mood, tense, dependency, particle, mutation,
-            person: "Base",
-            // 1st person singular does not have an analytic form, e.g. "molaim"
-            // Exception is "bí", which has "tá mé" as a present tense form, 
-            // added later in irregular verbs section.
-            pronoun: person !== "Sg1" ? defaultPronoun : ""
-          }));
+          if (person === "Sg1") {
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person,
+              // 1st person singular does not normally have an analytic form, e.g. "molaim"
+              pronoun: ""
+            }));
+
+            if (this.getLemma() === "bí") {
+              // "tá mé" is also acceptable
+              rules.push(new ConjugationRule({
+                mood, tense, dependency, particle, mutation,
+                person: "Base", pronoun: defaultPronoun
+              }));
+            }
+          } else {
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person: person === "Auto" ? "Auto" : "Base",
+              pronoun: defaultPronoun
+            }));
+          }
           if (person === "Pl1") {
             rules.push(new ConjugationRule({
               mood, tense, dependency, particle, mutation,
@@ -165,7 +182,7 @@ export class Verb implements ILexeme {
           // Only bí has a present habitual form
           rules.push(new ConjugationRule({
             mood, tense, dependency, particle, mutation,
-            person: "Base",
+            person: person === "Auto" ? "Auto" : "Base",
             // 1st person singular does not have an analytic form, i.e., "bím"
             pronoun: person !== "Sg1" ? defaultPronoun : ""
           }));
@@ -179,7 +196,8 @@ export class Verb implements ILexeme {
         case "Fut":
           rules.push(new ConjugationRule({
             mood, tense, dependency, particle, mutation,
-            person: "Base", pronoun: defaultPronoun
+            person: person === "Auto" ? "Auto" : "Base",
+            pronoun: defaultPronoun
           }));
           if (person === "Pl1") {
             rules.push(new ConjugationRule({
@@ -189,14 +207,22 @@ export class Verb implements ILexeme {
           }
           break;
         case "PastHab":
-          rules.push(new ConjugationRule({
-            mood, tense, dependency, particle, mutation,
-            person: "Base",
-            // 1st and 2nd person singular do not have an analytic form
-            pronoun: person !== "Sg1" && person !== "Sg2"
-              ? defaultPronoun
-              : ""
-          }));
+          if (person === "Sg1" || person === "Sg2") {
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person: adaptedPerson,
+              // 1st and 2nd person singular do not have an analytic form
+              pronoun: ""
+            }));
+          }
+          else {
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person: person === "Auto" ? "Auto" : "Base",
+              // 1st and 2nd person singular do not have an analytic form
+              pronoun: defaultPronoun
+            }));
+          }
           if (person === "Pl1" || person === "Pl3") {
             rules.push(new ConjugationRule({
               mood, tense, dependency, particle, mutation,
@@ -385,20 +411,26 @@ export class Verb implements ILexeme {
           break;
       }
 
-      return rules.map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
+      return ok(rules.map(r => r.apply(this).unwrapOr(null)).filter(r => r !== null));
     } else if (mood === "Cond") {
       const [particle, mutation] = conditionalParticles[shape][polarity];
       const rules: ConjugationRule[] = [];
-      rules.push(new ConjugationRule({
-        mood, tense, dependency, particle, mutation,
-        person: adaptedPerson,
-        pronoun: person !== "Sg1" && person !== "Sg2"
-          ? defaultPronoun
-          : ""
-      }));
+      if (person === "Sg1" || person === "Sg2") {
+        rules.push(new ConjugationRule({
+          mood, tense: null, dependency, particle, mutation,
+          person, pronoun: ""
+        }));
+      } else {
+        rules.push(new ConjugationRule({
+          mood, tense: null, dependency, particle, mutation,
+          person: person === "Auto" ? "Auto" : "Base",
+          pronoun: defaultPronoun
+        }));
+      }
+
       if (person === "Pl1" || person === "Pl3") {
         rules.push(new ConjugationRule({
-          mood, tense, dependency, particle, mutation,
+          mood, tense: null, dependency, particle, mutation,
           person: adaptedPerson, pronoun: ""
         }));
       }
@@ -410,7 +442,7 @@ export class Verb implements ILexeme {
         }
       }
 
-      return rules.map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
+      return ok(rules.map(r => r.apply(this).unwrapOr(null)).filter(r => r !== null));
     } else if (mood === "Imper") {
       const [particle, mutation] = imperativeParticles[polarity];
       const rules: ConjugationRule[] = [];
@@ -430,7 +462,7 @@ export class Verb implements ILexeme {
 
       if (!hasSyntheticForms || adaptedPerson === "Pl1" || adaptedPerson === "Pl3") {
         // For muid, siad analytic forms.
-        rules.push(new ConjugationRule({
+        rules.unshift(new ConjugationRule({
           mood: "Imper",
           tense: null,
           dependency: null,
@@ -441,7 +473,7 @@ export class Verb implements ILexeme {
         }));
       }
 
-      return rules.map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
+      return ok(rules.map(r => r.apply(this).unwrapOr(null)).filter(r => r !== null));
     } else if (mood === "Subj") {
       const [particle, mutation] = subjunctiveParticles[polarity];
 
@@ -461,7 +493,7 @@ export class Verb implements ILexeme {
 
       if (!hasSyntheticForms || adaptedPerson === "Pl1" || adaptedPerson === "Pl3") {
         // For muid, siad analytic forms.
-        rules.push(new ConjugationRule({
+        rules.unshift(new ConjugationRule({
           mood: "Subj",
           tense: null,
           dependency: null,
@@ -488,7 +520,7 @@ export class Verb implements ILexeme {
           break;
       }
 
-      return rules.map(r => r.apply(this)).filter(r => r.isOk).map(r => r.value);
+      return ok(rules.map(r => r.apply(this).unwrapOr(null)).filter(r => r !== null));
     } else {
       throw new Error(`Invalid mood/tense supplied: ${mood}/${tense}`);
     }
@@ -512,7 +544,7 @@ export class Verb implements ILexeme {
             for (const person of VPPersons) {
               conjugations.tenses.push(this.conjugateRule(
                 "Ind", tense, shape, polarity, dependency, person
-              ));
+              ).unwrapOr([]));
             }
           }
         }
@@ -525,7 +557,7 @@ export class Verb implements ILexeme {
         for (const person of VPPersons) {
           conjugations.moods.push(this.conjugateRule(
             mood, "Pres", "Declar", polarity, null, person
-          ));
+          ).unwrapOr([]));
         }
       }
     }
@@ -611,11 +643,11 @@ export class ConjugationRule {
     this.pronoun = props.pronoun;
   }
 
-  apply(verb: Verb): Ok<VerbPhrase> | Err<Error> {
+  apply(verb: Verb): Result<VerbPhrase | null, Error> {
     if (this.tense != null && this.dependency != null) {
       const verbForm = verb.forms.tenses[this.tense][this.dependency][this.person].at(0);
       if (!verbForm)
-        return err(new Error(`Verb form not found for ${this.tense}, ${this.dependency}, ${this.person}`));
+        return ok(null);
       else {
         return ok(new VerbPhrase({
           particle: this.particle,
@@ -629,7 +661,7 @@ export class ConjugationRule {
     } else if (this.mood != null) {
       const verbForm = verb.forms.moods[this.mood][this.person].at(0);
       if (!verbForm)
-        return err(new Error(`Verb form not found for ${this.mood}, ${this.person}`));
+        return ok(null);
       else {
         return ok(new VerbPhrase({
           particle: this.particle,
