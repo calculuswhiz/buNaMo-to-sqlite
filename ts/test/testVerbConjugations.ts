@@ -36,7 +36,7 @@ repository.initialize().then(async () => {
 
           for (const [person, expected] of presTestCases) {
             assert.deepEqual(
-              verb.conjugateRule("Ind", "Pres", "Declar", "Pos", "Indep", person)
+              verb.conjugateRule({ mood: "Ind", tense: "Pres" }, "Declar", "Pos", "Indep", person)
                 .mapIfOk(r => r.map(p => p.toString()))
                 .unwrapOr([]),
               expected,
@@ -60,7 +60,7 @@ repository.initialize().then(async () => {
 
           for (const [person, expected] of pastTestCases) {
             assert.deepEqual(
-              verb.conjugateRule("Ind", "Past", "Declar", "Pos", "Indep", person)
+              verb.conjugateRule({ mood: "Ind", tense: "Past" }, "Declar", "Pos", "Indep", person)
                 .mapIfOk(r => r.map(p => p.toString()))
                 .unwrapOr([]),
               expected,
@@ -84,7 +84,7 @@ repository.initialize().then(async () => {
 
           for (const [person, expected] of pastHabTestCases) {
             assert.deepEqual(
-              verb.conjugateRule("Ind", "PastHab", "Declar", "Pos", "Indep", person)
+              verb.conjugateRule({ mood: "Ind", tense: "PastHab" }, "Declar", "Pos", "Indep", person)
                 .mapIfOk(r => r.map(p => p.toString()))
                 .unwrapOr([]),
               expected,
@@ -108,7 +108,7 @@ repository.initialize().then(async () => {
 
           for (const [person, expected] of futTestCases) {
             assert.deepEqual(
-              verb.conjugateRule("Ind", "Fut", "Declar", "Pos", "Indep", person)
+              verb.conjugateRule({ mood: "Ind", tense: "Fut" }, "Declar", "Pos", "Indep", person)
                 .mapIfOk(r => r.map(p => p.toString()))
                 .unwrapOr([]),
               expected,
@@ -133,7 +133,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Cond", "Pres", "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Cond", tense: null }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -157,7 +157,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Subj", "Pres", "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Subj", tense: null }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -181,7 +181,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Imper", null, "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Imper", tense: null }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -214,7 +214,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "Pres", "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "Pres" }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -238,7 +238,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "Pres", "Declar", "Neg", "Indep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "Pres" }, "Declar", "Neg", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -262,7 +262,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "Pres", "Declar", "Pos", "Dep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "Pres" }, "Declar", "Pos", "Dep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -286,7 +286,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "PresHab", "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "PresHab" }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -310,7 +310,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "Past", "Declar", "Pos", "Indep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "Past" }, "Declar", "Pos", "Indep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,
@@ -334,7 +334,7 @@ repository.initialize().then(async () => {
 
         for (const [person, expected] of testCases) {
           assert.deepEqual(
-            verb.conjugateRule("Ind", "Past", "Declar", "Neg", "Dep", person)
+            verb.conjugateRule({ mood: "Ind", tense: "Past" }, "Declar", "Neg", "Dep", person)
               .mapIfOk(r => r.map(p => p.toString()))
               .unwrapOr([]),
             expected,

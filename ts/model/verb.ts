@@ -111,8 +111,13 @@ export class Verb implements ILexeme {
    * 
   */
   conjugateRule(
-    mood: VPMood,
-    tense: VPTense | null,
+    moodTense: {
+      mood: Exclude<VPMood, "Ind">,
+      tense: null
+    } | {
+      mood: "Ind",
+      tense: VPTense
+    },
     shape: VPShape,
     polarity: VPPolarity,
     dependency: Dependency | null,
@@ -126,6 +131,8 @@ export class Verb implements ILexeme {
 
     // Disable where the pronoun does not align with the person. E.g., might not exist
     const defaultPronoun = pronouns[person];
+
+    const { mood, tense } = moodTense;
 
     if (mood === "Ind" && tense != null) {
       const [particle, mutation] = indicativeParticles[tense][shape][polarity];
@@ -582,7 +589,7 @@ export class Verb implements ILexeme {
           for (const polarity of VPPolarities) {
             for (const person of VPPersons) {
               conjugations.tenses.push(this.conjugateRule(
-                "Ind", tense, shape, polarity, dependency, person
+                { mood: "Ind", tense }, shape, polarity, dependency, person
               ).unwrapOr([]));
             }
           }
@@ -592,10 +599,13 @@ export class Verb implements ILexeme {
 
     // Then other moods
     for (const mood of VPMoods) {
+      if (mood === "Ind")
+        continue;
+
       for (const polarity of VPPolarities) {
         for (const person of VPPersons) {
           conjugations.moods.push(this.conjugateRule(
-            mood, "Pres", "Declar", polarity, null, person
+            { mood, tense: null }, "Declar", polarity, null, person
           ).unwrapOr([]));
         }
       }

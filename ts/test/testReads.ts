@@ -1,31 +1,31 @@
-import path from 'node:path';
-import { Repository, getExistingDb } from '../repository';
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { _nn } from '../util';
+import path from "node:path";
+import { Repository, getExistingDb } from "../repository";
+import test from "node:test";
+import assert from "node:assert/strict";
+import { _nn } from "../util";
 
 // These just test db reads. Additional functionality will be captured in another file
 
-const db = getExistingDb(path.join(__dirname, '../../output/buNaMo.sqlite'));
+const db = getExistingDb(path.join(__dirname, "../../output/buNaMo.sqlite"));
 const repository = new Repository(db);
 repository.initialize().then(async () => {
-  test('Test reading adjective data', () => {
+  test("Test reading adjective data", () => {
     const adjective = _nn(
       repository.getAdjectivesByLemma("féasógach")[0],
-      'Adjective not found'
+      "Adjective not found"
     );
     assert.equal(adjective.getLemma(), "féasógach");
 
-    assert.equal(adjective.getComparativePresent()[0], 'níos féasógaí');
-    assert.equal(adjective.getSuperlativePresent()[0], 'is féasógaí');
+    assert.equal(adjective.getComparativePresent()[0], "níos féasógaí");
+    assert.equal(adjective.getSuperlativePresent()[0], "is féasógaí");
     assert.equal(adjective.getComparativePast()[0], "ní b'fhéasógaí");
-    assert.equal(adjective.getSuperlativePast()[0], 'ab fhéasógaí');
+    assert.equal(adjective.getSuperlativePast()[0], "ab fhéasógaí");
   });
 
-  test('Test reading noun data', () => {
+  test("Test reading noun data", () => {
     const noun = _nn(
       repository.getNounsByLemma("cat")[0],
-      'Noun not found'
+      "Noun not found"
     );
 
     assert.equal(noun.getLemma(), "cat");
@@ -35,10 +35,10 @@ repository.initialize().then(async () => {
     assert.equal(noun.forms.plGen[0].value, "cat");
   });
 
-  test('Test reading noun phrase data', () => {
+  test("Test reading noun phrase data", () => {
     const nounPhrase = _nn(
       repository.getNounPhrasesByLemma("fadhb mhór")[0],
-      'Noun phrase not found'
+      "Noun phrase not found"
     );
 
     assert.equal(nounPhrase.getLemma(), "fadhb mhór");
@@ -52,10 +52,10 @@ repository.initialize().then(async () => {
     assert.equal(nounPhrase.forms.plGenArt[0].value, "na bhfadhbanna móra");
   });
   
-  test('Test reading possessive data', () => {
+  test("Test reading possessive data", () => {
     const possessive = _nn(
       repository.getPossessivesByLemma("mo")[0],
-      'Possessive not found'
+      "Possessive not found"
     );
     
     assert.equal(possessive.getLemma(), "mo");
@@ -65,10 +65,10 @@ repository.initialize().then(async () => {
     assert.equal(possessive.forms.apos[0].value, "m'");
   });
 
-  test('Test reading preposition data', () => {
+  test("Test reading preposition data", () => {
     const preposition = _nn(
       repository.getPrepositionsByLemma("ag")[0],
-      'Preposition not found'
+      "Preposition not found"
     );
     
     assert.equal(preposition.getLemma(), "ag");
@@ -82,18 +82,18 @@ repository.initialize().then(async () => {
     assert.equal(preposition.forms.pl3[0].value, "acu");
   });
 
-  test('Test reading verb data', () => {
+  test("Test reading verb data", () => {
     const verb = _nn(
       repository.getVerbsByLemma("ól")[0],
-      'Verb not found'
+      "Verb not found"
     );
 
     assert.equal(verb.getLemma(), "ól");
     assert.equal(verb.disambig, "");
     assert.equal(verb.forms.verbalNoun[0].value, "ól");
     assert.equal(verb.forms.verbalAdjective[0].value, "ólta");
-    assert.equal(verb.forms.tenses.PresCont.Indep.Base[0].value, "ólann");
-    assert.equal(verb.forms.tenses.PresCont.Indep.Sg1[0].value, "ólaim");
+    assert.equal(verb.forms.tenses.Pres.Indep.Base[0].value, "ólann");
+    assert.equal(verb.forms.tenses.Pres.Indep.Sg1[0].value, "ólaim");
   });
 });
 
