@@ -1,16 +1,16 @@
-import xml2js from 'xml2js';
-import fs from 'fs/promises';
-import { initializeDefaultDb, Repository } from './repository';
+import xml2js from "xml2js";
+import fs from "fs/promises";
+import { initializeDefaultDb, Repository } from "./repository";
 
 async function parseXmlFile(filePath: string): Promise<any> {
-  const xmlData = await fs.readFile(filePath, 'utf-8');
+  const xmlData = await fs.readFile(filePath, "utf-8");
   return xml2js.parseStringPromise(xmlData);
 }
 
 const batchSize = 500;
 
 async function processAdjectives(repository: Repository) {
-  const adjectiveFiles = (await fs.readdir('./BuNaMo-master/adjective'))
+  const adjectiveFiles = (await fs.readdir("./BuNaMo-master/adjective"))
     .toSorted();
 
   console.log(`Processing ${adjectiveFiles.length} adjective files...`);
@@ -29,12 +29,12 @@ async function processAdjectives(repository: Repository) {
       const adjectiveId = repository.insertAdjective(
         adjective.$.declension,
         adjective.$.pre ?? false,
-        adjective.$.disambig ?? ''
+        adjective.$.disambig ?? ""
       );
 
       for (const [formKey, formValue] of Object.entries(adjective)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as { $: { default: string } }[];
@@ -54,13 +54,13 @@ async function processAdjectives(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function processNouns(repository: Repository) {
-  const nounFiles = (await fs.readdir('./BuNaMo-master/noun'))
+  const nounFiles = (await fs.readdir("./BuNaMo-master/noun"))
     .toSorted();
 
   console.log(`Processing ${nounFiles.length} noun files...`);
@@ -83,13 +83,13 @@ async function processNouns(repository: Repository) {
         noun.$.immutable ?? false,
         noun.$.definite ?? false,
         noun.$.allowArticledGenitive ?? false,
-        noun.$.disambig ?? ''
+        noun.$.disambig ?? ""
 
       );
 
       for (const [formKey, formValue] of Object.entries(noun)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as { $: { default: string, gender?: string, strength?: string } }[];
@@ -113,13 +113,13 @@ async function processNouns(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function processNounPhrases(repository: Repository) {
-  const nounPhraseFiles = (await fs.readdir('./BuNaMo-master/nounPhrase'))
+  const nounPhraseFiles = (await fs.readdir("./BuNaMo-master/nounPhrase"))
     .toSorted();
   console.log(`Processing ${nounPhraseFiles.length} noun phrase files...`);
 
@@ -140,12 +140,12 @@ async function processNounPhrases(repository: Repository) {
         nounPhrase.$.possessed ?? false,
         nounPhrase.$.immutable ?? false,
         nounPhrase.$.forceNominative ?? false,
-        nounPhrase.$.disambig ?? ''
+        nounPhrase.$.disambig ?? ""
       );
 
       for (const [formKey, formValue] of Object.entries(nounPhrase)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as { $: { default: string, gender?: string } }[];
@@ -168,13 +168,13 @@ async function processNounPhrases(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function processPossessives(repository: Repository) {
-  const possessiveFiles = (await fs.readdir('./BuNaMo-master/possessive'))
+  const possessiveFiles = (await fs.readdir("./BuNaMo-master/possessive"))
     .toSorted();
   console.log(`Processing ${possessiveFiles.length} possessive files...`);
 
@@ -191,15 +191,15 @@ async function processPossessives(repository: Repository) {
       const { possessive } = await parseXmlFile(`./BuNaMo-master/possessive/${file}`);
 
       const possessiveId = repository.insertPossessive(
-        possessive.$.mutation ?? '',
-        possessive.$.emphasizer ?? '',
-        possessive.$.disambig ?? '',
-        possessive.$.default ?? ''
+        possessive.$.mutation ?? "",
+        possessive.$.emphasizer ?? "",
+        possessive.$.disambig ?? "",
+        possessive.$.default ?? ""
       );
 
       for (const [formKey, formValue] of Object.entries(possessive)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as { $: { default: string, gender?: string } }[];
@@ -221,13 +221,13 @@ async function processPossessives(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function processPrepositions(repository: Repository) {
-  const prepositionFiles = (await fs.readdir('./BuNaMo-master/preposition'))
+  const prepositionFiles = (await fs.readdir("./BuNaMo-master/preposition"))
     .toSorted();
   console.log(`Processing ${prepositionFiles.length} preposition files...`);
 
@@ -244,13 +244,13 @@ async function processPrepositions(repository: Repository) {
       const { preposition } = await parseXmlFile(`./BuNaMo-master/preposition/${file}`);
 
       const prepositionId = repository.insertPreposition(
-        preposition.$.disambig ?? '',
-        preposition.$.default ?? ''
+        preposition.$.disambig ?? "",
+        preposition.$.default ?? ""
       );
 
       for (const [formKey, formValue] of Object.entries(preposition)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as { $: { default: string, gender?: string } }[];
@@ -272,13 +272,13 @@ async function processPrepositions(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function processVerbs(repository: Repository) {
-  const verbFiles = (await fs.readdir('./BuNaMo-master/verb'))
+  const verbFiles = (await fs.readdir("./BuNaMo-master/verb"))
     .toSorted();
   console.log(`Processing ${verbFiles.length} verb files...`);
 
@@ -295,14 +295,14 @@ async function processVerbs(repository: Repository) {
       const { verb } = await parseXmlFile(`./BuNaMo-master/verb/${file}`);
 
       const verbId = repository.insertVerb(
-        verb.$.disambig ?? ''
+        verb.$.disambig ?? ""
       );
       // Note: Do not rely on file name comparisons. Unicode characters cause issues with string comparisons.
       const isBí = verb.$.default === "bí";
 
       for (const [formKey, formValue] of Object.entries(verb)) {
         // Skip attributes
-        if (formKey === '$')
+        if (formKey === "$")
           continue;
 
         const forms = formValue as {
@@ -354,21 +354,21 @@ async function processVerbs(repository: Repository) {
   }
 
   if (repository.inTransaction) {
-    console.log('Committing remaining transaction...');
+    console.log("Committing remaining transaction...");
     repository.commitTransaction();
   }
 }
 
 async function main() {
-  if (!await fs.stat('./BuNaMo-master').catch(() => false)) {
-    console.error('BuNaMo-master directory not found. Please clone the BuNaMo repository into the project directory.');
-    console.error("    git clone https://github.com/michmech/BuNaMo.git")
+  if (!await fs.stat("./BuNaMo-master").catch(() => false)) {
+    console.error("BuNaMo-master directory not found. Please clone the BuNaMo repository into the project directory.");
+    console.error("    git clone https://github.com/michmech/BuNaMo.git");
     process.exit(1);
   }
 
-  const shouldRebuild = process.argv.includes('--rebuild');
+  const shouldRebuild = process.argv.includes("--rebuild");
 
-  const db = await initializeDefaultDb(shouldRebuild, './output/buNaMo.sqlite');
+  const db = await initializeDefaultDb(shouldRebuild, "./output/buNaMo.sqlite");
   const repository = new Repository(db);
   await repository.initialize();
 

@@ -246,7 +246,7 @@ export function slenderize(base: string, target?: string): string {
     return ret;
   } else {
     let ret = base;
-    if (!new RegExp(`[${VowelsSlender}]\$`).test(target)) {
+    if (!new RegExp(`[${VowelsSlender}]$`).test(target)) {
       ret = slenderize(base); //attempt regular slenderization instead
     }
     else {
@@ -355,7 +355,7 @@ export function prefix(prefix: string, body: string): string {
   let m: Mutation = "len1";
   if (endsDental(prefix))
     // Pick the right mutation
-    m = 'len2';
+    m = "len2";
 
   if (prefix[prefix.length - 1] === body[0])
     //eg. "sean-nós"
@@ -381,27 +381,27 @@ export function emphasize(text: string, emphasizer: Emphasizer): string {
     : "";
 
   let broadEnding = "", slenderEnding = "";
-  if (emphasizer === 'saSe' && lastLetter !== "s") {
+  if (emphasizer === "saSe" && lastLetter !== "s") {
     broadEnding = "sa";
     slenderEnding = "se";
   }
-  if (emphasizer === 'saSe' && lastLetter === "s") {
+  if (emphasizer === "saSe" && lastLetter === "s") {
     broadEnding = "-sa";
     slenderEnding = "-se";
   }
-  if (emphasizer === 'sanSean' && lastLetter !== "s") {
+  if (emphasizer === "sanSean" && lastLetter !== "s") {
     broadEnding = "san";
     slenderEnding = "sean";
   }
-  if (emphasizer === 'sanSean' && lastLetter === "s") {
+  if (emphasizer === "sanSean" && lastLetter === "s") {
     broadEnding = "-san";
     slenderEnding = "-sean";
   }
-  if (emphasizer === 'naNe' && lastLetter !== "n") {
+  if (emphasizer === "naNe" && lastLetter !== "n") {
     broadEnding = "na";
     slenderEnding = "ne";
   }
-  if (emphasizer === 'naNe' && lastLetter === "n") {
+  if (emphasizer === "naNe" && lastLetter === "n") {
     broadEnding = "-na";
     slenderEnding = "-ne";
   }

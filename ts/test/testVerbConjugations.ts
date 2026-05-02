@@ -190,5 +190,158 @@ repository.initialize().then(async () => {
         }
       });
     });
+
+    await test("Bí", async () => {
+      // Just test the special forms
+      const verb = getVerb("bí");
+
+      // No verbal adjective
+      assert.ok(verb.forms.verbalAdjective.length === 0);
+      assert.deepEqual(verb.forms.verbalNoun.map(x => x.value), ["bheith"]);
+
+      await test("Present affirmative independent", () => {
+        const testCases = [
+          ["Sg1", ["tá mé", "táim"]],
+          ["Sg2", ["tá tú"]],
+          ["Sg3Masc", ["tá sé"]],
+          ["Sg3Fem", ["tá sí"]],
+          ["Pl1", ["tá muid", "táimid"]],
+          ["Pl2", ["tá sibh"]],
+          ["Pl3", ["tá siad"]],
+          ["NoSubject", ["tá"]],
+          ["Auto", ["táthar"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "Pres", "Declar", "Pos", "Indep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+
+      await test("Present negative independent", () => {
+        const testCases = [
+          ["Sg1", ["níl mé", "nílim"]],
+          ["Sg2", ["níl tú"]],
+          ["Sg3Masc", ["níl sé"]],
+          ["Sg3Fem", ["níl sí"]],
+          ["Pl1", ["níl muid", "nílimid"]],
+          ["Pl2", ["níl sibh"]],
+          ["Pl3", ["níl siad"]],
+          ["NoSubject", ["níl"]],
+          ["Auto", ["níltear"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "Pres", "Declar", "Neg", "Indep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+
+      await test("Present Dependent", () => {
+        const testCases = [
+          ["Sg1", ["go bhfuil mé", "go bhfuilim"]],
+          ["Sg2", ["go bhfuil tú"]],
+          ["Sg3Masc", ["go bhfuil sé"]],
+          ["Sg3Fem", ["go bhfuil sí"]],
+          ["Pl1", ["go bhfuil muid", "go bhfuilimid"]],
+          ["Pl2", ["go bhfuil sibh"]],
+          ["Pl3", ["go bhfuil siad"]],
+          ["NoSubject", ["go bhfuil"]],
+          ["Auto", ["go bhfuiltear"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "Pres", "Declar", "Pos", "Dep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+
+      await test("Present Habitual", () => {
+        const testCases = [
+          ["Sg1", ["bím"]],
+          ["Sg2", ["bíonn tú"]],
+          ["Sg3Masc", ["bíonn sé"]],
+          ["Sg3Fem", ["bíonn sí"]],
+          ["Pl1", ["bíonn muid", "bímid"]],
+          ["Pl2", ["bíonn sibh"]],
+          ["Pl3", ["bíonn siad"]],
+          ["NoSubject", ["bíonn"]],
+          ["Auto", ["bítear"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "PresHab", "Declar", "Pos", "Indep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+
+      await test("Past Independent", () => {
+        const testCases = [
+          ["Sg1", ["bhí mé"]],
+          ["Sg2", ["bhí tú"]],
+          ["Sg3Masc", ["bhí sé"]],
+          ["Sg3Fem", ["bhí sí"]],
+          ["Pl1", ["bhí muid", "bhíomar"]],
+          ["Pl2", ["bhí sibh"]],
+          ["Pl3", ["bhí siad", "bhíodar"]],
+          ["NoSubject", ["bhí"]],
+          ["Auto", ["bhíothas"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "Past", "Declar", "Pos", "Indep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+
+      await test("Past Dependent Negative", () => {
+        const testCases = [
+          ["Sg1", ["ní raibh mé"]],
+          ["Sg2", ["ní raibh tú"]],
+          ["Sg3Masc", ["ní raibh sé"]],
+          ["Sg3Fem", ["ní raibh sí"]],
+          ["Pl1", ["ní raibh muid", "ní rabhamar"]],
+          ["Pl2", ["ní raibh sibh"]],
+          ["Pl3", ["ní raibh siad", "ní rabhadar"]],
+          ["NoSubject", ["ní raibh"]],
+          ["Auto", ["ní rabhthas"]]
+        ] as const;
+
+        for (const [person, expected] of testCases) {
+          assert.deepEqual(
+            verb.conjugateRule("Ind", "Past", "Declar", "Neg", "Dep", person)
+              .mapIfOk(r => r.map(p => p.toString()))
+              .unwrapOr([]),
+            expected,
+            `Failed for person ${person}`
+          );
+        }
+      });
+    });
   });
 });

@@ -1,16 +1,16 @@
-import { DatabaseSync } from 'node:sqlite';
-import fs from 'fs/promises';
-import { _nn, lowerFirstLetter } from './util';
-import path from 'path';
-import { Adjective, AdjectiveForm, type AdjectiveFormName } from './model/adjective';
-import { Noun, NounForm, type NounFormName } from './model/noun';
-import type { Emphasizer, Gender, Mutation, Strength } from './features';
-import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from './model/nounPhrase';
-import { Possessive, PossessiveForm, type PossessiveFormName } from './model/possessive';
-import { Preposition, PrepositionForm, type PrepositionFormName } from './model/preposition';
-import { Verb, VerbForm, type Dependency, type Mood, type Person, type Tense } from './model/verb';
+import { DatabaseSync } from "node:sqlite";
+import fs from "fs/promises";
+import { _nn, lowerFirstLetter } from "./util";
+import path from "path";
+import { Adjective, AdjectiveForm, type AdjectiveFormName } from "./model/adjective";
+import { Noun, NounForm, type NounFormName } from "./model/noun";
+import type { Emphasizer, Gender, Mutation, Strength } from "./features";
+import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from "./model/nounPhrase";
+import { Possessive, PossessiveForm, type PossessiveFormName } from "./model/possessive";
+import { Preposition, PrepositionForm, type PrepositionFormName } from "./model/preposition";
+import { Verb, VerbForm, type Dependency, type Mood, type Person, type Tense } from "./model/verb";
 
-const uninitializedErrorMessage = 'Repository must be initialized before use (.initialize() must be called)';
+const uninitializedErrorMessage = "Repository must be initialized before use (.initialize() must be called)";
 
 /** Initialize a new database with the default schema.
  * @param clean Optionally specify to delete existing database file before creating a new one
@@ -21,7 +21,7 @@ export async function initializeDefaultDb(clean: boolean, outFile: string) {
     await fs.rm(outFile, { force: true });
 
   const db = new DatabaseSync(outFile);
-  db.exec(await fs.readFile('./sql/Schema.sql', 'utf-8'));
+  db.exec(await fs.readFile("./sql/Schema.sql", "utf-8"));
   return db;
 }
 
@@ -37,12 +37,12 @@ export class Repository {
 
   /** SQL insert statements */
   private inserters: {
-    [key: string]: ReturnType<DatabaseSync['prepare']>;
+    [key: string]: ReturnType<DatabaseSync["prepare"]>;
   } = {};
 
   /** SQL read statements */
   private readers: {
-    [key: string]: ReturnType<DatabaseSync['prepare']>;
+    [key: string]: ReturnType<DatabaseSync["prepare"]>;
   } = {};
 
   constructor(db: DatabaseSync) {
@@ -59,37 +59,37 @@ export class Repository {
   inTransaction = false;
 
   beginTransaction() {
-    this.db.exec('BEGIN');
+    this.db.exec("BEGIN");
     this.inTransaction = true;
   }
 
   commitTransaction() {
-    this.db.exec('COMMIT');
+    this.db.exec("COMMIT");
     this.inTransaction = false;
   }
 
   rollbackTransaction() {
-    this.db.exec('ROLLBACK');
+    this.db.exec("ROLLBACK");
     this.inTransaction = false;
   }
 
   async generatePreparedStatements() {
-    const insertDirectory = path.join(__dirname, '../sql/Inserts');
+    const insertDirectory = path.join(__dirname, "../sql/Inserts");
     for (const file of await fs.readdir(insertDirectory, { withFileTypes: true })) {
-      if (!file.name.endsWith('.sql'))
+      if (!file.name.endsWith(".sql"))
         continue;
 
       this.inserters[lowerFirstLetter(file.name.slice(0, -4))] = this.db.prepare(
-        await fs.readFile(path.join(insertDirectory, file.name), 'utf-8')
+        await fs.readFile(path.join(insertDirectory, file.name), "utf-8")
       );
     }
 
-    const readDirectory = path.join(__dirname, '../sql/Reads');
+    const readDirectory = path.join(__dirname, "../sql/Reads");
     for (const file of await fs.readdir(readDirectory, { withFileTypes: true })) {
-      if (!file.name.endsWith('.sql'))
+      if (!file.name.endsWith(".sql"))
         continue;
       this.readers[lowerFirstLetter(file.name.slice(0, -4))] = this.db.prepare(
-        await fs.readFile(path.join(readDirectory, file.name), 'utf-8')
+        await fs.readFile(path.join(readDirectory, file.name), "utf-8")
       );
     }
   }
@@ -613,7 +613,7 @@ export class Repository {
           verb.forms.moods[form.mood][form.person]
             .push(newForm);
         } else {
-          verb.forms[form.formType as 'verbalNoun' | 'verbalAdjective']
+          verb.forms[form.formType as "verbalNoun" | "verbalAdjective"]
             .push(newForm);
         }
       }

@@ -59,8 +59,8 @@ export class Verb implements ILexeme {
   /** Basic verb forms.
    * Does not represent a complete set of conjugations.
    * E.g. The base form is referenced presCont, 2nd, 3rd, and 1st analytic forms,
-   * but not present in the actual database as a separate for"
-   *" For this, use the function conjugateRule.
+   * but not present in the actual database as a separate form.
+   * For this, use the function conjugateRule.
    */
   forms = {
     verbalNoun: [] as VerbForm[],
@@ -93,7 +93,7 @@ export class Verb implements ILexeme {
    * if not available, then the past tense base is the lemma
   */
   getLemma(): string {
-    return this.forms.tenses.Pres.Dep.Sg2[0]?.value
+    return this.forms.moods.Imper.Sg2[0]?.value
       ?? this.forms.tenses.Past.Indep.Base[0]?.value;
   }
 
@@ -159,7 +159,7 @@ export class Verb implements ILexeme {
 
             if (this.getLemma() === "bí") {
               // "tá mé" is also acceptable
-              rules.push(new ConjugationRule({
+              rules.unshift(new ConjugationRule({
                 mood, tense, dependency, particle, mutation,
                 person: "Base", pronoun: defaultPronoun
               }));
@@ -180,12 +180,20 @@ export class Verb implements ILexeme {
           break;
         case "PresHab":
           // Only bí has a present habitual form
-          rules.push(new ConjugationRule({
-            mood, tense, dependency, particle, mutation,
-            person: person === "Auto" ? "Auto" : "Base",
+          if (person === "Sg1") {
             // 1st person singular does not have an analytic form, i.e., "bím"
-            pronoun: person !== "Sg1" ? defaultPronoun : ""
-          }));
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person, pronoun: ""
+            }));
+          } else {
+            rules.push(new ConjugationRule({
+              mood, tense, dependency, particle, mutation,
+              person: person === "Auto" ? "Auto" : "Base",
+              pronoun: defaultPronoun
+            }));
+          }
+
           if (person === "Pl1") {
             rules.push(new ConjugationRule({
               mood, tense, dependency, particle, mutation,
@@ -235,7 +243,38 @@ export class Verb implements ILexeme {
       // Irregular verbs
       switch (this.getLemma()) {
         case "bí":
-          if (tense === "Past") {
+          if (tense === "Pres") {
+            if (dependency === "Indep") {
+              if (shape === "Declar" && polarity === "Neg") {
+                // Forms not present in db.
+                const base = "níl";
+                if (person === "Sg1") {
+                  return ok([
+                    new VerbPhrase({ particle: "", verbForm: base, pronoun: defaultPronoun }),
+                    new VerbPhrase({ particle: "", verbForm: "nílim", pronoun: "" })
+                  ]);
+                } else if (person === "Pl1") {
+                  return ok([
+                    new VerbPhrase({ particle: "", verbForm: base, pronoun: defaultPronoun }),
+                    new VerbPhrase({ particle: "", verbForm: "nílimid", pronoun: "" })
+                  ]);
+                } else if (person === "Auto") {
+                  return ok([
+                    new VerbPhrase({ particle: "", verbForm: "níltear", pronoun: defaultPronoun })
+                  ]);
+                } else {
+                  return ok([
+                    new VerbPhrase({ particle: "", verbForm: base, pronoun: defaultPronoun })
+                  ]);
+                }
+              }
+            } else if (dependency === "Dep") {
+              for (const r of rules) {
+                r.particle = "go";
+                r.mutation = "ecl1";
+              }
+            }
+          } else if (tense === "Past") {
             if (shape === "Declar" && polarity === "Pos") {
               for (const r of rules)
                 r.mutation = "len1D";
