@@ -4,6 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { _nn } from '../util';
 
+// These just test db reads. Additional functionality will be captured in another file
+
 const db = getExistingDb(path.join(__dirname, '../../output/buNaMo.sqlite'));
 const repository = new Repository(db);
 repository.initialize().then(async () => {
@@ -92,8 +94,6 @@ repository.initialize().then(async () => {
     assert.equal(verb.forms.verbalAdjective[0].value, "ólta");
     assert.equal(verb.forms.tenses.PresCont.Indep.Base[0].value, "ólann");
     assert.equal(verb.forms.tenses.PresCont.Indep.Sg1[0].value, "ólaim");
-
-    // TODO rest of conjugations are not well-mapped
   });
 });
 
