@@ -15,6 +15,7 @@ function performReplacements(
   return text;
 }
 
+/** Remove lenition/eclipsis/prefixes added to mutated words */
 export function demutate(text: string): string {
   return performReplacements([
     [/^bh(f.*)$/i, "$1"],
@@ -348,7 +349,6 @@ export function syncope(base: string): string {
 }
 
 // HighlightMutations ignored. It is not the goal of this project to produce html at the moment.
-
 
 export function prefix(prefix: string, body: string): string {
   // Default mutation

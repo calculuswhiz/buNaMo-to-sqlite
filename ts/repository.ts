@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "fs/promises";
-import { _nn, lowerFirstLetter } from "./util";
+import { _nnResult, lowerFirstLetter } from "./util";
 import path from "path";
 import { Adjective, AdjectiveForm, type AdjectiveFormName } from "./model/adjective";
 import { Noun, NounForm, type NounFormName } from "./model/noun";
@@ -9,6 +9,7 @@ import { NounPhrase, NounPhraseForm, type NounPhraseFormName } from "./model/nou
 import { Possessive, PossessiveForm, type PossessiveFormName } from "./model/possessive";
 import { Preposition, PrepositionForm, type PrepositionFormName } from "./model/preposition";
 import { Verb, VerbForm, type Dependency, type Mood, type Person, type Tense } from "./model/verb";
+import { err, ok, type Result } from "./neverEverThrow";
 
 const uninitializedErrorMessage = "Repository must be initialized before use (.initialize() must be called)";
 
@@ -96,6 +97,8 @@ export class Repository {
 
   // #region Insertion API. Always returns ID of the inserted row
 
+  // TODO Use Result type instead of _nn.
+
   insertNoun(
     declension: number,
     isProper: boolean,
@@ -103,17 +106,19 @@ export class Repository {
     isDefinite: boolean,
     allowArticledGenitive: boolean,
     disambig: string) {
-    return _nn(
-      this.inserters.insertNoun
-      , uninitializedErrorMessage
-    ).run(
-      declension,
-      +isProper,
-      +isImmutable,
-      +isDefinite,
-      +allowArticledGenitive,
-      disambig
-    ).lastInsertRowid as number;
+    return _nnResult(
+      this.inserters.insertNoun,
+      uninitializedErrorMessage
+    ).mapIfOk(x => x
+      .run(
+        declension,
+        +isProper,
+        +isImmutable,
+        +isDefinite,
+        +allowArticledGenitive,
+        disambig
+      ).lastInsertRowid as number
+    );
   }
 
   insertNounUsingProps(props: Noun) {
@@ -134,11 +139,11 @@ export class Repository {
     gender: string | null,
     strength: string | null
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertNounForm,
       uninitializedErrorMessage
-    ).run(nounId, formName, value, gender, strength)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(nounId, formName, value, gender, strength)
+      .lastInsertRowid as number);
   }
 
   insertNounFormUsingProps(props: NounForm) {
@@ -157,11 +162,13 @@ export class Repository {
     isImmutable: boolean,
     forceNominative: boolean,
     disambig: string) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertNounPhrase,
       uninitializedErrorMessage
-    ).run(+isDefinite, +isPossessed, +isImmutable, +forceNominative, disambig)
-      .lastInsertRowid as number;
+    ).mapIfOk(x =>
+      x.run(+isDefinite, +isPossessed, +isImmutable, +forceNominative, disambig)
+        .lastInsertRowid as number
+    );
   }
 
   insertNounPhraseUsingProps(props: NounPhrase) {
@@ -189,19 +196,19 @@ export class Repository {
     value: string,
     gender: string | null
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertNounPhraseForm,
       uninitializedErrorMessage
-    ).run(nounPhraseId, formName, value, gender)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(nounPhraseId, formName, value, gender)
+      .lastInsertRowid as number);
   }
 
   insertAdjective(declension: number, isPre: boolean, disambig: string) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertAdjective,
       uninitializedErrorMessage
-    ).run(declension, +isPre, disambig)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(declension, +isPre, disambig)
+      .lastInsertRowid as number);
   }
 
   insertAdjectiveUsingProps(props: Adjective) {
@@ -217,10 +224,10 @@ export class Repository {
     formName: string,
     value: string,
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertAdjectiveForm, uninitializedErrorMessage
-    ).run(adjectiveId, formName, value)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(adjectiveId, formName, value)
+      .lastInsertRowid as number);
   }
 
   insertAdjectiveFormUsingProps(props: AdjectiveForm) {
@@ -232,10 +239,10 @@ export class Repository {
   }
 
   insertVerb(disambig: string) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertVerb, uninitializedErrorMessage
-    ).run(disambig)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(disambig)
+      .lastInsertRowid as number);
   }
 
   insertVerbUsingProps(props: Verb) {
@@ -251,10 +258,10 @@ export class Repository {
     mood: string,
     person: string | null
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertVerbForm, uninitializedErrorMessage
-    ).run(verbId, formType, value, tense, dependency, mood, person)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(verbId, formType, value, tense, dependency, mood, person)
+      .lastInsertRowid as number);
   }
 
   insertVerbFormUsingProps(props: VerbForm) {
@@ -270,10 +277,10 @@ export class Repository {
   }
 
   insertPreposition(disambig: string, lemma: string) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertPreposition, uninitializedErrorMessage
-    ).run(disambig, lemma)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(disambig, lemma)
+      .lastInsertRowid as number);
   }
 
   insertPrepositionUsingProps(props: Preposition) {
@@ -285,10 +292,10 @@ export class Repository {
     formName: string,
     value: string
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertPrepositionForm, uninitializedErrorMessage
-    ).run(prepositionId, formName, value)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(prepositionId, formName, value)
+      .lastInsertRowid as number);
   }
 
   insertPrepositionFormUsingProps(props: PrepositionForm) {
@@ -305,10 +312,10 @@ export class Repository {
     disambig: string,
     lemma: string
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertPossessive, uninitializedErrorMessage
-    ).run(mutation, emphasizer, disambig, lemma)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(mutation, emphasizer, disambig, lemma)
+      .lastInsertRowid as number);
   }
 
   insertPossessiveUsingProps(props: Possessive) {
@@ -325,10 +332,10 @@ export class Repository {
     formName: string,
     value: string
   ) {
-    return _nn(
+    return _nnResult(
       this.inserters.insertPossessiveForm, uninitializedErrorMessage
-    ).run(possessiveId, formName, value)
-      .lastInsertRowid as number;
+    ).mapIfOk(x => x.run(possessiveId, formName, value)
+      .lastInsertRowid as number);
   }
 
   insertPossessiveFormUsingProps(props: PossessiveForm) {
@@ -344,17 +351,25 @@ export class Repository {
   // #region Retrieval API. Don't try to support everything. 
   // You can always write custom SQL if you need it.
 
-  getAdjectivesByLemma(lemma: string) {
-    const rawAdjectives = _nn(
+  getAdjectivesByLemma(lemma: string): Result<Adjective[], Error> {
+    const rawAdjectivesResult = _nnResult(
       this.readers.getAdjectives, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(
+    if (!rawAdjectivesResult.isOk)
+      return err(rawAdjectivesResult.error);
+
+    const formsQueryResult = _nnResult(
       this.readers.getAdjectiveForms, uninitializedErrorMessage
     );
 
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
+
     const adjectives: Adjective[] = [];
-    for (const rawAdjective of rawAdjectives) {
+    for (const rawAdjective of rawAdjectivesResult.value) {
       const adjective = new Adjective({
         adjectiveId: rawAdjective.adjectiveId as number,
         declension: rawAdjective.declension as number,
@@ -383,18 +398,26 @@ export class Repository {
       }
     }
 
-    return adjectives;
+    return ok(adjectives);
   }
 
-  getNounsByLemma(lemma: string) {
-    const rawNouns = _nn(
+  getNounsByLemma(lemma: string): Result<Noun[], Error> {
+    const rawNounsResult = _nnResult(
       this.readers.getNouns, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(this.readers.getNounForms, uninitializedErrorMessage);
+    if (!rawNounsResult.isOk)
+      return err(rawNounsResult.error);
+
+    const formsQueryResult = _nnResult(this.readers.getNounForms, uninitializedErrorMessage);
+
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
 
     const nouns: Noun[] = [];
-    for (const rawNoun of rawNouns) {
+    for (const rawNoun of rawNounsResult.value) {
       const noun = new Noun({
         nounId: rawNoun.nounId as number,
         declension: rawNoun.declension as number,
@@ -430,20 +453,28 @@ export class Repository {
       }
     }
 
-    return nouns;
+    return ok(nouns);
   }
 
-  getNounPhrasesByLemma(lemma: string) {
-    const rawNounPhrases = _nn(
+  getNounPhrasesByLemma(lemma: string): Result<NounPhrase[], Error> {
+    const rawNounPhrasesResult = _nnResult(
       this.readers.getNounPhrases, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(
+    if (!rawNounPhrasesResult.isOk)
+      return err(rawNounPhrasesResult.error);
+
+    const formsQueryResult = _nnResult(
       this.readers.getNounPhraseForms, uninitializedErrorMessage
     );
 
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
+
     const nounPhrases: NounPhrase[] = [];
-    for (const rawNounPhrase of rawNounPhrases) {
+    for (const rawNounPhrase of rawNounPhrasesResult.value) {
       const nounPhrase = new NounPhrase({
         nounPhraseId: rawNounPhrase.nounPhraseId as number,
         isDefinite: !!rawNounPhrase.isDefinite,
@@ -476,20 +507,28 @@ export class Repository {
       }
     }
 
-    return nounPhrases;
+    return ok(nounPhrases);
   }
 
-  getPossessivesByLemma(lemma: string) {
-    const rawPossessives = _nn(
+  getPossessivesByLemma(lemma: string): Result<Possessive[], Error> {
+    const rawPossessivesResult = _nnResult(
       this.readers.getPossessives, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(
+    if (!rawPossessivesResult.isOk)
+      return err(rawPossessivesResult.error);
+
+    const formsQueryResult = _nnResult(
       this.readers.getPossessiveForms, uninitializedErrorMessage
     );
 
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
+
     const possessives: Possessive[] = [];
-    for (const rawPossessive of rawPossessives) {
+    for (const rawPossessive of rawPossessivesResult.value) {
       const possessive = new Possessive({
         possessiveId: rawPossessive.possessiveId as number,
         mutation: rawPossessive.mutation as Mutation,
@@ -519,20 +558,28 @@ export class Repository {
       }
     }
 
-    return possessives;
+    return ok(possessives);
   }
 
-  getPrepositionsByLemma(lemma: string) {
-    const rawPrepositions = _nn(
+  getPrepositionsByLemma(lemma: string): Result<Preposition[], Error> {
+    const rawPrepositionsResult = _nnResult(
       this.readers.getPrepositions, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(
+    if (!rawPrepositionsResult.isOk)
+      return err(rawPrepositionsResult.error);
+
+    const formsQueryResult = _nnResult(
       this.readers.getPrepositionForms, uninitializedErrorMessage
     );
 
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
+
     const prepositions: Preposition[] = [];
-    for (const rawPreposition of rawPrepositions) {
+    for (const rawPreposition of rawPrepositionsResult.value) {
       const preposition = new Preposition({
         prepositionId: rawPreposition.prepositionId as number,
         disambig: rawPreposition.disambig as string,
@@ -560,21 +607,29 @@ export class Repository {
       }
     }
 
-    return prepositions;
+    return ok(prepositions);
   }
 
-  getVerbsByLemma(lemma: string) {
-    const foundVerbs = _nn(
+  getVerbsByLemma(lemma: string): Result<Verb[], Error> {
+    const foundVerbsResult = _nnResult(
       this.readers.getVerbs, uninitializedErrorMessage
-    ).all({ lemma });
+    ).mapIfOk(x => x.all({ lemma }));
 
-    const formsQuery = _nn(
+    if (!foundVerbsResult.isOk)
+      return err(foundVerbsResult.error);
+
+    const formsQueryResult = _nnResult(
       this.readers.getVerbForms, uninitializedErrorMessage
     );
 
+    if (!formsQueryResult.isOk)
+      return err(formsQueryResult.error);
+
+    const formsQuery = formsQueryResult.value;
+
     const verbs: Verb[] = [];
 
-    for (const foundVerb of foundVerbs) {
+    for (const foundVerb of foundVerbsResult.value) {
       const verb = new Verb({
         verbId: foundVerb.verbId as number,
         disambig: foundVerb.disambig as string
@@ -619,7 +674,7 @@ export class Repository {
       }
     }
 
-    return verbs;
+    return ok(verbs);
   }
 
   // #endregion

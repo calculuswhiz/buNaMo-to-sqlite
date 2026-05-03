@@ -9,10 +9,14 @@ const repository = new Repository(db);
 repository.initialize().then(async () => {
   test("Verb conjugation consistent with Caighdeán", async () => {
     // Note: The database does not contain conjugation classes
-    const getVerb = (verbName: string) => _nn(
-      repository.getVerbsByLemma(verbName)[0],
-      `Verb ${verbName} not found`
-    );
+    const getVerb = (verbName: string) => {
+      return _nn(
+        repository.getVerbsByLemma(verbName)
+          .mapIfOk(x => x[0])
+          .unwrapOr(null),
+        `Verb ${verbName} not found`
+      );
+    };
 
     await test("Regular verb", async () => {
       const verb = getVerb("mol");

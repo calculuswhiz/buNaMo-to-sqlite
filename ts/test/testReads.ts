@@ -4,16 +4,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { _nn } from "../util";
 
-// These just test db reads. Additional functionality will be captured in another file
+// These just test db reads. Grammar specific functionality will be captured in another file
 
 const db = getExistingDb(path.join(__dirname, "../../output/buNaMo.sqlite"));
 const repository = new Repository(db);
 repository.initialize().then(async () => {
   test("Test reading adjective data", () => {
     const adjective = _nn(
-      repository.getAdjectivesByLemma("féasógach")[0],
-      "Adjective not found"
+      repository.getAdjectivesByLemma("féasógach")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Adjective not found"
     );
+
     assert.equal(adjective.getLemma(), "féasógach");
 
     assert.equal(adjective.getComparativePresent()[0], "níos féasógaí");
@@ -24,9 +26,9 @@ repository.initialize().then(async () => {
 
   test("Test reading noun data", () => {
     const noun = _nn(
-      repository.getNounsByLemma("cat")[0],
-      "Noun not found"
-    );
+      repository.getNounsByLemma("cat")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Noun not found");
 
     assert.equal(noun.getLemma(), "cat");
     assert.equal(noun.getGender(), "masc");
@@ -37,8 +39,9 @@ repository.initialize().then(async () => {
 
   test("Test reading noun phrase data", () => {
     const nounPhrase = _nn(
-      repository.getNounPhrasesByLemma("fadhb mhór")[0],
-      "Noun phrase not found"
+      repository.getNounPhrasesByLemma("fadhb mhór")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Noun phrase not found"
     );
 
     assert.equal(nounPhrase.getLemma(), "fadhb mhór");
@@ -51,13 +54,14 @@ repository.initialize().then(async () => {
     assert.equal(nounPhrase.forms.plNomArt[0].value, "na fadhbanna móra");
     assert.equal(nounPhrase.forms.plGenArt[0].value, "na bhfadhbanna móra");
   });
-  
+
   test("Test reading possessive data", () => {
     const possessive = _nn(
-      repository.getPossessivesByLemma("mo")[0],
-      "Possessive not found"
+      repository.getPossessivesByLemma("mo")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Possessive not found"
     );
-    
+
     assert.equal(possessive.getLemma(), "mo");
     assert.equal(possessive.mutation, "len1");
     assert.equal(possessive.emphasizer, "saSe");
@@ -67,10 +71,11 @@ repository.initialize().then(async () => {
 
   test("Test reading preposition data", () => {
     const preposition = _nn(
-      repository.getPrepositionsByLemma("ag")[0],
-      "Preposition not found"
+      repository.getPrepositionsByLemma("ag")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Preposition not found"
     );
-    
+
     assert.equal(preposition.getLemma(), "ag");
     assert.equal(preposition.disambig, "");
     assert.equal(preposition.forms.sg1[0].value, "agam");
@@ -84,8 +89,9 @@ repository.initialize().then(async () => {
 
   test("Test reading verb data", () => {
     const verb = _nn(
-      repository.getVerbsByLemma("ól")[0],
-      "Verb not found"
+      repository.getVerbsByLemma("ól")
+        .mapIfOk(x => x[0])
+        .unwrapOr(null), "Verb not found"
     );
 
     assert.equal(verb.getLemma(), "ól");
