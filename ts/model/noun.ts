@@ -39,6 +39,20 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
       plVoc: props.forms?.plVoc ?? [],
       count: props.forms?.count ?? []
     };
+
+    // Inlined AddDative. Ensures that noun has dative singular form
+    if (this.forms.sgDat.length === 0) {
+      for (const sgNomForm of this.forms.sgNom) {
+        this.forms.sgDat.push(new NounForm(
+          sgNomForm.nounFormId,
+          sgNomForm.nounId,
+          "sgDat",
+          sgNomForm.value,
+          sgNomForm.gender,
+          sgNomForm.strength
+        ));
+      }
+    }
   }
 
   getLemma(): string {
@@ -64,8 +78,6 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
     const disambigPart = this.disambig != "" ? `_${this.disambig}` : "";
     return `${lemma} (${this.getGender()}${declensionPart}${disambigPart})`;
   }
-
-  // TODO Implement AddDative
 }
 
 export type NounFormName = "sgNom" | "sgGen" | "sgVoc" | "sgDat"

@@ -111,13 +111,7 @@ export class Verb implements ILexeme {
    * 
   */
   conjugateRule(
-    moodTense: {
-      mood: Exclude<VPMood, "Ind">,
-      tense: null
-    } | {
-      mood: "Ind",
-      tense: VPTense
-    },
+    moodTense: MoodTense,
     shape: VPShape,
     polarity: VPPolarity,
     dependency: Dependency | null,
@@ -572,25 +566,35 @@ export class Verb implements ILexeme {
     }
   }
 
-  /** Return an enumeration of all possible conjugations */
-  conjugateAll() {
-    const conjugations: {
-      tenses: VerbPhrase[][],
-      moods: VerbPhrase[][]
-    } = {
-      tenses: [],
-      moods: []
-    };
-
+  /** Get an enumerator of all possible conjugations.
+   * If you want an array, you can do Array.from/spread the result.
+   * @returns An enumerator of all possible conjugations, 
+   * along with the rules that generate them.
+   */
+  *conjugateAll(): Generator<{
+    moodTense: MoodTense;
+    dependency: Dependency | null;
+    shape: VPShape;
+    polarity: VPPolarity;
+    person: VPPerson;
+    conjugatedForms: VerbPhrase[];
+  }> {
     // Indicative first
     for (const tense of VPTenses) {
       for (const shape of VPShapes) {
-        for (const dependency of ["Indep", "Dep"] as Dependency[]) {
+        for (const dependency of Dependencies) {
           for (const polarity of VPPolarities) {
             for (const person of VPPersons) {
-              conjugations.tenses.push(this.conjugateRule(
-                { mood: "Ind", tense }, shape, polarity, dependency, person
-              ).unwrapOr([]));
+              yield ({
+                moodTense: { mood: "Ind", tense },
+                dependency,
+                shape,
+                polarity,
+                person,
+                conjugatedForms: this.conjugateRule(
+                  { mood: "Ind", tense }, shape, polarity, dependency, person
+                ).unwrapOr([])
+              });
             }
           }
         }
@@ -604,22 +608,35 @@ export class Verb implements ILexeme {
 
       for (const polarity of VPPolarities) {
         for (const person of VPPersons) {
-          conjugations.moods.push(this.conjugateRule(
-            { mood, tense: null }, "Declar", polarity, null, person
-          ).unwrapOr([]));
+          yield {
+            moodTense: { mood, tense: null },
+            dependency: null,
+            shape: "Declar",
+            polarity,
+            person,
+            conjugatedForms: this.conjugateRule(
+              { mood, tense: null }, "Declar", polarity, null, person
+            ).unwrapOr([])
+          };
         }
       }
     }
-
-    return conjugations;
   }
 }
 
 export type Tense = VPTense;
-export type Dependency = "Indep" | "Dep";
+export const Dependencies = ["Indep", "Dep"] as const;
+export type Dependency = typeof Dependencies[number];
 export type Mood = VPMood;
 export type Person = "Base" | "Sg3"
   | Exclude<VPPerson, "Sg3Masc" | "Sg3Fem" | "NoSubject">;
+type MoodTense = {
+  mood: Exclude<Mood, "Ind">;
+  tense: null;
+} | {
+  mood: "Ind";
+  tense: Tense;
+};
 
 export class VerbForm {
   verbFormId: number;

@@ -25,6 +25,11 @@ There are a few breaking changes if you are used to working with the original Bu
 - Instead, `Pres` is used for this purpose, and `PresHab` is used for present habitual.
 - Indicative mood is explicitly represented as `Ind` instead of null.
 
+### Differences between TS library and Gramadan library
+
+- Verb forms are not all calculated upon construction of a verb. Instead, call the conjugation methods to obtain them. If you really want an array of all conjugations, you can do `Array.from(verb.conjugateAll())` or `[...verb.conjugateAll()]`.
+- XML generation methods have not been implemented (yet?).
+
 ## Usage
 
 ### Converter
