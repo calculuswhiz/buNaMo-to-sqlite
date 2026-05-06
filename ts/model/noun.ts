@@ -55,6 +55,10 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
     }
   }
 
+  clone() {
+    return new Noun(structuredClone(this));
+  }
+
   getLemma(): string {
     return this.forms.sgNom[0]?.value ?? "";
   }
