@@ -11,6 +11,7 @@
     "build": "tsx ts/build.ts",
     "rebuild": "tsx ts/build.ts --rebuild",
     "testReads": "tsx ts/test/testReads.ts",
+    "testMutators": "tsx ts/test/testMutators.ts",
     "testVerbConjugations": "tsx ts/test/testVerbConjugations.ts"
   },
   "dependencies": {

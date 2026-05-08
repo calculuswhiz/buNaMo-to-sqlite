@@ -146,14 +146,12 @@ export function mutate(mutation: Mutation, text: string): string {
     ], text);
   }
   else if (mutation === "prefT") {
-    // t-prefixation
     return performReplacements([
       [/^([aeiouáéíúó])(.*)$/, "t-$1$2"],
       [/^([AEIOUÁÉÍÚÓ])(.*)$/, "t$1$2"],
     ], text);
   }
   else if (mutation === "prefH") {
-    // h-prefixation
     const pattern = /^([aeiuoáéíúó])(.*)$/i;
     if (pattern.test(text))
       return text.replace(pattern, "h$1$2");
@@ -212,97 +210,102 @@ export const VowelsSlender = "eiéí";
 
 /**
  * If target is not provided:
- *   Performs regular slenderization (attenuation): if the base ends in a consonant, and if the vowel cluster immediately before this consonant
- *   ends in a broad vowel, then it changes this vowel cluster such that it ends in a slender vowel now.
+ *   Performs regular slenderization (attenuation, palatalization): 
+ *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
+ *    ends in a broad vowel, then it changes this vowel cluster such that it ends in a slender vowel now.
  *   @note A base that's already slender passes through unchanged.
  * 
  * Otherwise:
- *   Performs irregular slenderization (attenuation): if the base ends in a consonant, and if the vowel cluster immediately before this consonant
- *   ends in a broad vowel, then it changes this vowel cluster into the target (the second argument).
+ *   Performs irregular slenderization (attenuation, palatalization): 
+ *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
+ *    ends in a broad vowel, then it changes this vowel cluster into the target (the second argument).
  *   @note If the target does not end in a slender vowel, then regular slenderization is attempted instead.
  *   @note A base that's already attenuated passes through unchanged.
  */
 export function slenderize(base: string, target?: string): string {
   if (target === undefined) {
-    let ret = base;
-
-    const sources = ["ea", "éa", "ia", "ío", "io", "iu", "ae"] as const;
-    const targets = ["i", "éi", "éi", "í", "i", "i", "aei"] as const;
-    let match: RegExpMatchArray | null;
-    for (let i = 0; i < sources.length; i++) {
-      match = base.match(new RegExp(`^(.*[${Cosonants}])?${sources[i]}([${Cosonants}]+)$`));
-
-      if (match != null && match.length > 0) {
-        ret = (match[1] ?? "") + targets[i] + (match[2] ?? "");
-        return ret;
-      }
+    const replaceTable = [
+      ["ea", "i"],
+      ["éa", "éi"],
+      ["ia", "éi"],
+      ["ío", "í"],
+      ["io", "i"],
+      ["iu", "i"],
+      ["ae", "aei"]
+    ] as const;
+    for (const [source, target] of replaceTable) {
+      const replacement = base.replace(
+        new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+        `$1${target}$2`
+      );
+      if (replacement !== base)
+        return replacement;
     }
 
     // The generic case: insert "i" at the end of the vowel cluster:
-    match = base.match(new RegExp(`^(.*[${VowelsBroad}])([${Cosonants}]+)$`));
-    if (match != null && match.length > 0) {
-      ret = (match[1] ?? "") + "i" + (match[2] ?? "");
-    }
-
-    return ret;
+    return base.replace(
+      new RegExp(`^(.*[${VowelsBroad}])([${Cosonants}]+)$`),
+      "$1i$2"
+    );
+  } else if (!new RegExp(`[${VowelsSlender}]$`).test(target)) {
+    // Attempt regular slenderization instead
+    return slenderize(base);
   } else {
-    let ret = base;
-    if (!new RegExp(`[${VowelsSlender}]$`).test(target)) {
-      ret = slenderize(base); //attempt regular slenderization instead
-    }
-    else {
-      const match = base.match(new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Cosonants}]+)$`));
-      if (match != null && match.length > 0)
-        ret = (match[1] ?? "") + target + (match[2] ?? "");
-    }
-    return ret;
+    return base.replace(
+      // Broad vowel maintained.
+      new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Cosonants}]+)$`),
+      `$1${target}$2`
+    );
   }
 }
 
 /**
  * If target is not provided:
- *   Performs regular broadening: if the base ends in a consonant, and if the vowel cluster immediately before this consonant
- *   ends in a slender vowel, then it changes this vowel cluster such that it ends in a broad vowel now.
+ *   Performs regular broadening: 
+ *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
+ *    ends in a slender vowel, then it changes this vowel cluster such that it ends in a broad vowel now.
  *   @note A base that's already broad passes through unchanged.
  * 
  * Otherwise:
- *   Performs irregular broadening: if the base ends in a consonant, and if the vowel cluster immediately before this consonant
- *   ends in a slender vowel, then it changes this vowel cluster into the target (the second argument).
+ *   Performs irregular broadening: 
+ *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
+ *    ends in a slender vowel, then it changes this vowel cluster into the target (the second argument).
  *   @note If the target does not end in a broad vowel, then regular broadening is attempted instead.
  *   @note A base that's already broad passes through unchanged.
  */
 export function broaden(base: string, target?: string): string {
   if (target === undefined) {
-    let ret = base;
-
-    const sources = ["ói", "ei", "éi", "i", "aí", "í", "ui", "io"] as const;
-    const targets = ["ó", "ea", "éa", "ea", "aío", "ío", "o", "ea"] as const;
-    let match: RegExpMatchArray | null;
-    for (let i = 0; i < sources.length; i++) {
-      match = base.match(new RegExp(`^(.*[${Cosonants}])?${sources[i]}([${Cosonants}]+)$`));
-      if (match != null && match.length > 0) {
-        ret = (match[1] ?? "") + targets[i] + (match[2] ?? "");
-        return ret;
-      }
+    const replaceTable = [
+      ["ói", "ó"],
+      ["ei", "ea"],
+      ["éi", "éa"],
+      ["i", "ea"],
+      ["aí", "aío"],
+      ["í", "ío"],
+      ["ui", "o"],
+      ["io", "ea"],
+    ] as const;
+    for (const [source, target] of replaceTable) {
+      const replacement = base.replace(
+        new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+        `$1${target}$2`
+      );
+      if (replacement !== base)
+        return replacement;
     }
 
     // The generic case: remove "i" from the end of the vowel cluster:
-    match = base.match(new RegExp(`^(.*)i([${Cosonants}]+)$`));
-    if (match != null && match.length > 0)
-      ret = (match[1] ?? "") + (match[2] ?? "");
-
-    return ret;
+    return base.replace(
+      new RegExp(`^(.*)i([${Cosonants}]+)$`),
+      "$1$2"
+    );
+  } else if (!new RegExp(`[${VowelsBroad}]$`).test(target)) {
+    return broaden(base); //attempt regular broadening instead
   } else {
-    let ret = base;
-    if (!new RegExp(`[${VowelsBroad}]$`).test(target)) {
-      ret = broaden(base); //attempt regular broadening instead
-    }
-    else {
-      const match = base.match(new RegExp(`^(.*[${Vowels}]*[${VowelsSlender}])([${Cosonants}]+)$`));
-      if (match != null && match.length > 0)
-        ret = (match[1] ?? "") + target + (match[2] ?? "");
-    }
-    return ret;
+    return base.replace(
+      new RegExp(`^(.*[${Vowels}]*[${VowelsSlender}])([${Cosonants}]+)$`),
+      `$1${target}$2`
+    );
   }
 }
 
@@ -311,27 +314,19 @@ export function broaden(base: string, target?: string): string {
  * and if neither one of them is "l", "n" or "r", then devoices the second one.
  */
 export function devoice(base: string): string {
-  let ret = base;
-  const match = base.match(/^(.*)sd$/);
-  if (match) {
-    ret = match[1] + "st";
-    return ret;
-  }
-  //May need elaboration.
-  return ret;
+  // May need elaboration.
+  // ^ From original code base.
+  return base.replace(/^(.*)sd$/, "$1st");
 }
 
 /**
  * Reduces any duplicated consonants at the end into a single consonant.
  */
 export function unduplicate(base: string): string {
-  let ret = base;
-
-  const match = base.match(new RegExp(`^.*[${Cosonants}][${Cosonants}]$`));
-  if (match && base[base.length - 1] === base[base.length - 2])
-    ret = base.substring(0, base.length - 1);
-
-  return ret;
+  return base.match(new RegExp(`^.*[${Cosonants}][${Cosonants}]$`)) != null
+    && base.at(-1) === base.at(-2)
+    ? base.slice(0, -1)
+    : base;
 }
 
 /**
@@ -339,78 +334,53 @@ export function unduplicate(base: string): string {
  * then unduplicates and devoices the consonant cluster at the end.
  */
 export function syncope(base: string): string {
-  let ret = base;
-
   const match = base.match(new RegExp(`^(.*[${Cosonants}])?[${Vowels}]+([${Cosonants}]+)$`));
-  if (match)
-    ret = devoice(unduplicate((match[1] ?? "") + (match[2] ?? "")));
-
-  return ret;
+  return match != null
+    ? devoice(unduplicate((match[1] ?? "") + (match[2] ?? "")))
+    : base;
 }
 
 // HighlightMutations ignored. It is not the goal of this project to produce html at the moment.
 
 export function prefix(prefix: string, body: string): string {
   // Default mutation
-  let m: Mutation = "len1";
-  if (endsDental(prefix))
-    // Pick the right mutation
-    m = "len2";
+  const m: Mutation = endsDental(prefix) ? "len1" : "len2";
+  const mutatedBody = mutate(m, body);
 
-  if (prefix[prefix.length - 1] === body[0])
-    //eg. "sean-nós"
+  //eg. "sean-nós"
+  if (prefix.at(-1) === body.at(0))
     prefix += "-";
-
-  if (endsVowel(prefix) && startsVowel(body))
+  else if (endsVowel(prefix) && startsVowel(body))
     //eg. "ró-éasca"
     prefix += "-";
-
-  //eg. "seanÉireannach" > "Sean-Éireannach"
-  if (body.slice(0, 1) === body.slice(0, 1).toUpperCase()) {
+  else if (body.at(0) === body.at(0)?.toUpperCase()) {
+    //eg. "seanÉireannach" > "Sean-Éireannach"
     prefix = prefix.slice(0, 1).toUpperCase() + prefix.slice(1);
     if (!prefix.endsWith("-"))
       prefix += "-";
   }
-  return prefix + mutate(m, body);
+  return prefix + mutatedBody;
 }
 
 //Attaches an emphasizer to the end of the text (which should be the form of a noun, or a string which ends in one):
 export function emphasize(text: string, emphasizer: Emphasizer): string {
-  const lastLetter = text.length > 1
-    ? text.slice(-1).toLowerCase()
-    : "";
+  const lastLetter = text.at(-1)?.toLowerCase() ?? "";
 
-  let broadEnding = "", slenderEnding = "";
-  if (emphasizer === "saSe" && lastLetter !== "s") {
-    broadEnding = "sa";
-    slenderEnding = "se";
-  }
-  if (emphasizer === "saSe" && lastLetter === "s") {
-    broadEnding = "-sa";
-    slenderEnding = "-se";
-  }
-  if (emphasizer === "sanSean" && lastLetter !== "s") {
-    broadEnding = "san";
-    slenderEnding = "sean";
-  }
-  if (emphasizer === "sanSean" && lastLetter === "s") {
-    broadEnding = "-san";
-    slenderEnding = "-sean";
-  }
-  if (emphasizer === "naNe" && lastLetter !== "n") {
-    broadEnding = "na";
-    slenderEnding = "ne";
-  }
-  if (emphasizer === "naNe" && lastLetter === "n") {
-    broadEnding = "-na";
-    slenderEnding = "-ne";
-  }
+  const infixHyphen = emphasizer === "saSe" && lastLetter === "s"
+    || emphasizer === "sanSean" && lastLetter === "s"
+    || emphasizer === "naNe" && lastLetter === "n"
+    ? "-" : "";
 
-  let ret = text;
+  const [broadEnding, slenderEnding] = emphasizer === "saSe"
+    ? ["sa", "se"]
+    : emphasizer === "sanSean"
+      ? ["san", "sean"]
+      : ["na", "ne"];
+
   if (/(a|ae|o|u|á|ó|ú)[bcdfghjklmnpqrstvwxz]*$/i.test(text))
-    ret = text + broadEnding;
+    return text + infixHyphen + broadEnding;
   else if (/(e|é|i|í)[bcdfghjklmnpqrstvwxz]*$/i.test(text))
-    ret = text + slenderEnding;
-
-  return ret;
+    return text + infixHyphen + slenderEnding;
+  else
+    return text;
 }

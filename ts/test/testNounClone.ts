@@ -1,6 +1,6 @@
 import test from "node:test";
-import { Noun, NounForm } from "../model/noun";
 import assert from "node:assert";
+import { Noun, NounForm } from "../model/noun";
 
 test("Test noun clone doesn't affect original", () => {
   const noun = new Noun({
