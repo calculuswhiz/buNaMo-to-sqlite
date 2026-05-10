@@ -36,78 +36,38 @@ export function demutate(text: string): string {
 
 /** Performs a mutation on the string: */
 export function mutate(mutation: Mutation, text: string): string {
-  let ret = "";
+  if (mutation.startsWith("len")) {
+    const lenitionVariant = mutation.at(3);
 
-  if (mutation === "len1" || mutation === "len1D") {
-    // Do not mutate exotic words with J in second position, like Djibouti
-    if (/^([pbmftdcg])j/i.test(text))
-      ret = text;
-    else {
-      ret = performReplacements([
-        [/^([pbmftdcg])(.*)$/i, "$1h$2"],
-        [/^(s)([rnlaeiouáéíóú].*)$/i, "$1h$2"]
-      ], text);
-    }
+    const lenited = lenitionVariant === "1"
+      ? performReplacements([
+        // Normal lenitable consonants, except when followed by "j" like in "Djibouti"
+        [/^([pbmftdcg])([^j]*)$/i, "$1h$2"],
+        // s lenition
+        [/^s([rnlaeiouáéíóú].*)$/i, "sh$1"]
+      ], text)
+      : lenitionVariant === "2"
+        ? text.replace(/^([pbmfcg])([^j]*)$/i, "$1h$2")
+        : lenitionVariant === "3"
+          ? performReplacements([
+            [/^([pbmfcg])([^j]*)$/i, "$1h$2"],
+            [/^s([rnlaeiouáéíóú].*)$/i, "ts$1"]
+          ], text)
+          : text;
 
-    if (mutation === "len1D") {
-      const pattern = /^([aeiouáéíóúf])(.*)$/i;
-      if (pattern.test(ret))
-        ret = ret.replace(pattern, "d'$1$2");
-    }
-
-    return ret;
-  }
-  else if (mutation === "len2" || mutation === "len2D") {
-    // Same as lenition 1 but leaves "d", "t" and "s" unmutated
-    // Do not mutate exotic words with J in second position, like Djibouti
-    const pattern = /^([pbmftdcg])j/i;
-    if (pattern.test(text))
-      ret = text;
-    else {
-      const pattern = /^([pbmfcg])(.*)$/i;
-      ret = pattern.test(text)
-        ? text.replace(pattern, "$1h$2")
-        : text;
-    }
-
-    if (mutation === "len2D") {
-      const pattern = /^([aeiouáéíóúf])(.*)$/i;
-      if (pattern.test(ret))
-        ret = ret.replace(pattern, "d'$1$2");
-    }
-
-    return ret;
-  }
-  else if (mutation === "len3" || mutation === "len3D") {
-    // Same as lenition 2 but also changes "s" into "ts"
-    // Do not mutate exotic words with J in second position, like Djibouti
-    const pattern = /^([pbmftdcg])j/i;
-    if (pattern.test(text))
-      ret = text;
-    else {
-      ret = performReplacements([
-        [/^([pbmfcg])(.*)$/i, "$1h$2"],
-        [/^(s)([rnlaeiouáéíóú].*)$/i, "t$1$2"]
-      ], text);
-    }
-
-    if (mutation === "len3D") {
-      const pattern = /^([aeiouáéíóúf])(.*)$/i;
-      if (pattern.test(ret))
-        ret = ret.replace(pattern, "d'$1$2");
-    }
-
-    return ret;
+    return mutation.endsWith("D")
+      ? lenited.replace(/^([aeiouáéíóúf])(.*)$/i, "d'$1$2")
+      : lenited;
   }
   else if (mutation === "ecl1") {
     return performReplacements([
-      [/^(p)(.*)$/i, "b$1$2"],
-      [/^(b)(.*)$/i, "m$1$2"],
-      [/^(f)(.*)$/i, "bh$1$2"],
-      [/^(c)(.*)$/i, "g$1$2"],
-      [/^(g)(.*)$/i, "n$1$2"],
-      [/^(t)(.*)$/i, "d$1$2"],
-      [/^(d)(.*)$/i, "n$1$2"],
+      [/^p(.*)$/i, "bp$1"],
+      [/^b(.*)$/i, "mb$1"],
+      [/^f(.*)$/i, "bhf$1"],
+      [/^c(.*)$/i, "gc$1"],
+      [/^g(.*)$/i, "ng$1"],
+      [/^t(.*)$/i, "dt$1"],
+      [/^d(.*)$/i, "nd$1"],
       [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
       [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
     ], text);
@@ -115,34 +75,34 @@ export function mutate(mutation: Mutation, text: string): string {
   else if (mutation === "ecl1x") {
     // Same as eclipsis 1 but leaves vowels unchanged
     return performReplacements([
-      [/^(p)(.*)$/i, "b$1$2"],
-      [/^(b)(.*)$/i, "m$1$2"],
-      [/^(f)(.*)$/i, "bh$1$2"],
-      [/^(c)(.*)$/i, "g$1$2"],
-      [/^(g)(.*)$/i, "n$1$2"],
-      [/^(t)(.*)$/i, "d$1$2"],
-      [/^(d)(.*)$/i, "n$1$2"],
+      [/^p(.*)$/i, "bp$1"],
+      [/^b(.*)$/i, "mb$1"],
+      [/^f(.*)$/i, "bhf$1"],
+      [/^c(.*)$/i, "gc$1"],
+      [/^g(.*)$/i, "ng$1"],
+      [/^t(.*)$/i, "dt$1"],
+      [/^d(.*)$/i, "nd$1"],
     ], text);
   }
   else if (mutation === "ecl2") {
     // Same as eclipsis 1 but leaves "t", "d" and vowels unchanged
     return performReplacements([
-      [/^(p)(.*)$/i, "b$1$2"],
-      [/^(b)(.*)$/i, "m$1$2"],
-      [/^(f)(.*)$/i, "bh$1$2"],
-      [/^(c)(.*)$/i, "g$1$2"],
-      [/^(g)(.*)$/i, "n$1$2"],
+      [/^p(.*)$/i, "bp$1"],
+      [/^b(.*)$/i, "mb$1"],
+      [/^f(.*)$/i, "bhf$1"],
+      [/^c(.*)$/i, "gc$1"],
+      [/^g(.*)$/i, "ng$1"],
     ], text);
   }
   else if (mutation === "ecl3") {
     // Same as eclipsis 2 but also changes "s" to "ts"
     return performReplacements([
-      [/^(p)(.*)$/i, "b$1$2"],
-      [/^(b)(.*)$/i, "m$1$2"],
-      [/^(f)(.*)$/i, "bh$1$2"],
-      [/^(c)(.*)$/i, "g$1$2"],
-      [/^(g)(.*)$/i, "n$1$2"],
-      [/^(s)([rnlaeiouáéíóú].*)$/i, "t$1$2"],
+      [/^p(.*)$/i, "bp$1"],
+      [/^b(.*)$/i, "mb$1"],
+      [/^f(.*)$/i, "bhf$1"],
+      [/^c(.*)$/i, "gc$1"],
+      [/^g(.*)$/i, "ng$1"],
+      [/^s([rnlaeiouáéíóú].*)$/i, "ts$1"],
     ], text);
   }
   else if (mutation === "prefT") {
@@ -151,13 +111,8 @@ export function mutate(mutation: Mutation, text: string): string {
       [/^([AEIOUÁÉÍÚÓ])(.*)$/, "t$1$2"],
     ], text);
   }
-  else if (mutation === "prefH") {
-    const pattern = /^([aeiuoáéíúó])(.*)$/i;
-    if (pattern.test(text))
-      return text.replace(pattern, "h$1$2");
-    else
-      return text;
-  }
+  else if (mutation === "prefH")
+    return text.replace(/^([aeiuoáéíúó])(.*)$/i, "h$1$2");
   else
     return text;
 }
@@ -208,6 +163,16 @@ export const Vowels = "aeiouáéíóú";
 export const VowelsBroad = "aouáóú";
 export const VowelsSlender = "eiéí";
 
+const palatalizationReplaceTable = [
+  ["ea", "i"],
+  ["éa", "éi"],
+  ["ia", "éi"],
+  ["ío", "í"],
+  ["io", "i"],
+  ["iu", "i"],
+  ["ae", "aei"]
+] as const;
+
 /**
  * If target is not provided:
  *   Performs regular slenderization (attenuation, palatalization): 
@@ -224,16 +189,7 @@ export const VowelsSlender = "eiéí";
  */
 export function slenderize(base: string, target?: string): string {
   if (target === undefined) {
-    const replaceTable = [
-      ["ea", "i"],
-      ["éa", "éi"],
-      ["ia", "éi"],
-      ["ío", "í"],
-      ["io", "i"],
-      ["iu", "i"],
-      ["ae", "aei"]
-    ] as const;
-    for (const [source, target] of replaceTable) {
+    for (const [source, target] of palatalizationReplaceTable) {
       const replacement = base.replace(
         new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
         `$1${target}$2`
@@ -259,6 +215,16 @@ export function slenderize(base: string, target?: string): string {
   }
 }
 
+const broadenReplaceTable = [
+  ["ói", "ó"],
+  ["ei", "ea"],
+  ["éi", "éa"],
+  ["i", "ea"],
+  ["aí", "aío"],
+  ["í", "ío"],
+  ["ui", "o"],
+  ["io", "ea"],
+] as const;
 /**
  * If target is not provided:
  *   Performs regular broadening: 
@@ -275,17 +241,7 @@ export function slenderize(base: string, target?: string): string {
  */
 export function broaden(base: string, target?: string): string {
   if (target === undefined) {
-    const replaceTable = [
-      ["ói", "ó"],
-      ["ei", "ea"],
-      ["éi", "éa"],
-      ["i", "ea"],
-      ["aí", "aío"],
-      ["í", "ío"],
-      ["ui", "o"],
-      ["io", "ea"],
-    ] as const;
-    for (const [source, target] of replaceTable) {
+    for (const [source, target] of broadenReplaceTable) {
       const replacement = base.replace(
         new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
         `$1${target}$2`
@@ -300,7 +256,8 @@ export function broaden(base: string, target?: string): string {
       "$1$2"
     );
   } else if (!new RegExp(`[${VowelsBroad}]$`).test(target)) {
-    return broaden(base); //attempt regular broadening instead
+    // Attempt regular broadening instead
+    return broaden(base);
   } else {
     return base.replace(
       new RegExp(`^(.*[${Vowels}]*[${VowelsSlender}])([${Cosonants}]+)$`),
