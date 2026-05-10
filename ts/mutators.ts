@@ -27,7 +27,7 @@ export function demutate(text: string): string {
     [/^b(p.*)$/i, "$1"],
     [/^t(s.*)$/i, "$1"],
     [/^d(t.*)$/i, "$1"],
-    [/^d'(f)h(.*)$/i, "$1$2"],
+    [/^d'fh(.*)$/i, "f$1"],
     [/^d'([aeiouáéíóú].*)$/i, "$1"],
     [/^h([aeiouáéíóú].*)$/i, "$1"],
     [/^n-([aeiouáéíóú].*)$/i, "$1"],
@@ -37,27 +37,29 @@ export function demutate(text: string): string {
 /** Performs a mutation on the string: */
 export function mutate(mutation: Mutation, text: string): string {
   if (mutation.startsWith("len")) {
-    const lenitionVariant = mutation.at(3);
+    const lenitionVariant = mutation.at(3) as "1" | "2" | "3";
+
+    const commonLenition = text.replace(
+      // ^j is for exotic loanwords like "Djibouti" where j is in second position
+      /^([pbmfcg])([^j]*)$/i,
+      "$1h$2"
+    );
+
+    // Cannot early exit here due to "D" subvariants
 
     const lenited = lenitionVariant === "1"
       ? performReplacements([
-        // Normal lenitable consonants, except when followed by "j" like in "Djibouti"
-        [/^([pbmftdcg])([^j]*)$/i, "$1h$2"],
+        [/^([td])([^j]*)$/i, "$1h$2"],
         // s lenition
         [/^s([rnlaeiouáéíóú].*)$/i, "sh$1"]
-      ], text)
+      ], commonLenition)
       : lenitionVariant === "2"
-        // Same as lenition 1 but leaves "s", "t", "d" unchanged
-        ? text.replace(/^([pbmfcg])([^j]*)$/i, "$1h$2")
-        : lenitionVariant === "3"
-          // Same as lenition 2 but also changes "s" to "ts" before r, n, l and vowels
-          ? performReplacements([
-            [/^([pbmfcg])([^j]*)$/i, "$1h$2"],
-            [/^s([rnlaeiouáéíóú].*)$/i, "ts$1"]
-          ], text)
-          : text;
+        // Same as lenition 1 but leaves "s", "t", "d" unchanged. Handled by common
+        ? commonLenition
+        // Same as lenition 2 but also changes "s" to "ts" before r, n, l and vowels
+        : commonLenition.replace(/^s([rnlaeiouáéíóú].*)$/i, "ts$1");
 
-    return mutation.endsWith("D")
+    return mutation === "len1D" || mutation === "len2D" || mutation === "len3D"
       ? lenited.replace(/^([aeiouáéíóúf])(.*)$/i, "d'$1$2")
       : lenited;
   }
@@ -80,11 +82,13 @@ export function mutate(mutation: Mutation, text: string): string {
         [/^t(.*)$/i, "dt$1"],
         [/^d(.*)$/i, "nd$1"],
         ...(
-          // x subvariant is consonants only
-          !mutation.endsWith("x") ? [
-            [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
-            [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
-          ] as [RegExp, string][] : []
+          mutation.endsWith("x")
+            // x subvariant is consonants only
+            ? []
+            : [
+              [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
+              [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
+            ] as [RegExp, string][]
         )
       ], commonEclipsis);
     }
@@ -105,53 +109,61 @@ export function mutate(mutation: Mutation, text: string): string {
     ], text);
   }
   else if (mutation === "prefH")
-    return text.replace(/^([aeiuoáéíúó])(.*)$/i, "h$1$2");
+    return text.replace(/^([aeiouáéíóú])(.*)$/i, "h$1$2");
   else
     return text;
 }
 
-/** Tells you whether the string ends in a "dentals" cosonant: */
+const dentalPattern = /[dnts]$/i;
+/** Tells you whether the string ends in a "dentals" consonant: */
 export function endsDental(txt: string): boolean {
-  return /[dnts]$/i.test(txt);
+  return dentalPattern.test(txt);
 }
 
+const slenderPattern = /[eiéí][^aeiouáéíóú]*$/i;
 /** Tells you whether the string ends in a slender consonant cluster: */
 export function isSlender(txt: string): boolean {
-  return /[eiéí][^aeiouáéíóú]+$/.test(txt);
+  return slenderPattern.test(txt);
 }
 
+const slenderIPattern = /[ií][^aeiouáéíóú]*$/i;
 /** Tells you whether the string ends in a slender consonant cluster where the slenderness is caused by an "i" (and not by an "e"): */
 export function isSlenderI(txt: string): boolean {
-  return /[ií][^aeiouáéíóú]+$/.test(txt);
+  return slenderIPattern.test(txt);
 }
 
+const startsVowelFhxPattern = /^[aeiouáéíóú]|^fh[^lr]/i;
 /** Tells you whether the string has a vowel or 'fh' (but not 'fhl' or 'fhr') at its start: */
 export function startsVowelFhx(txt: string): boolean {
-  return /^[aeiouáéíóú]|^fh[^lr]/i.test(txt);
+  return startsVowelFhxPattern.test(txt);
 }
 
+const endsVowelPattern = /[aeiouáéíóú]$/i;
 /** Tells you whether the string ends in a vowel: */
 export function endsVowel(txt: string): boolean {
-  return /[aeiouáéíóú]$/i.test(txt);
+  return endsVowelPattern.test(txt);
 }
 
+const startsVowelPattern = /^[aeiouáéíóú]/i;
 /** Tells you whether the string starts in a vowel: */
 export function startsVowel(txt: string): boolean {
-  return /^[aeiouáéíóú]/i.test(txt);
+  return startsVowelPattern.test(txt);
 }
 
+const startsFVowelPattern = /^f[aeiouáéíóú]/i;
 /** Tells you whether the string starts in F followed by a vowel: */
 export function startsFVowel(txt: string): boolean {
-  return /^f[aeiouáéíóú]/i.test(txt);
+  return startsFVowelPattern.test(txt);
 }
 
+const startsBilabialPattern = /^[bmp]/i;
 /** Tells you whether the string starts in b, m, p: */
 export function startsBilabial(txt: string): boolean {
-  return /^[bmp]/i.test(txt);
+  return startsBilabialPattern.test(txt);
 }
 
 // Character types, for convenience when writing regular expressions:
-export const Cosonants = "bcdfghjklmnpqrstvwxz";
+export const Consonants = "bcdfghjklmnpqrstvwxz";
 export const Vowels = "aeiouáéíóú";
 export const VowelsBroad = "aouáóú";
 export const VowelsSlender = "eiéí";
@@ -165,9 +177,13 @@ const palatalizationReplaceTable = [
   ["iu", "i"],
   ["ae", "aei"]
 ].map(([source, target]) => ([
-  new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+  new RegExp(`^(.*[${Consonants}])?${source}([${Consonants}]+)$`),
   `$1${target}$2`
 ] as [RegExp, string]));
+
+const slenderizePattern = new RegExp(`^(.*[${VowelsBroad}])([${Consonants}]+)$`);
+const endsWithSlenderVowelPattern = new RegExp(`[${VowelsSlender}]$`);
+const irregularSlenderizePattern = new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Consonants}]+)$`);
 
 /**
  * If target is not provided:
@@ -190,20 +206,14 @@ export function slenderize(base: string, target?: string): string {
       return slenderized;
     else {
       // The generic case: insert "i" at the end of the vowel cluster:
-      return base.replace(
-        new RegExp(`^(.*[${VowelsBroad}])([${Cosonants}]+)$`),
-        "$1i$2"
-      );
+      return base.replace(slenderizePattern, "$1i$2");
     }
-  } else if (!new RegExp(`[${VowelsSlender}]$`).test(target)) {
+  } else if (!endsWithSlenderVowelPattern.test(target)) {
     // Attempt regular slenderization instead
     return slenderize(base);
   } else {
-    return base.replace(
-      // Broad vowel maintained.
-      new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Cosonants}]+)$`),
-      `$1${target}$2`
-    );
+    // Broad vowel maintained.
+    return base.replace(irregularSlenderizePattern, `$1${target}$2`);
   }
 }
 
@@ -217,9 +227,14 @@ const broadenReplaceTable = [
   ["ui", "o"],
   ["io", "ea"],
 ].map(([source, target]) => ([
-  new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+  new RegExp(`^(.*[${Consonants}])?${source}([${Consonants}]+)$`),
   `$1${target}$2`
 ] as [RegExp, string]));
+
+const broadeningPattern = new RegExp(`^(.*)i([${Consonants}]+)$`);
+const endsWithBroadVowelPattern = new RegExp(`[${VowelsBroad}]$`);
+const irregularBroadeningPattern = new RegExp(`^(.*[${Vowels}]*[${VowelsSlender}])i([${Consonants}]+)$`);
+
 /**
  * If target is not provided:
  *   Performs regular broadening: 
@@ -241,19 +256,13 @@ export function broaden(base: string, target?: string): string {
       return broadened;
     else {
       // The generic case: remove "i" from the end of the vowel cluster:
-      return base.replace(
-        new RegExp(`^(.*)i([${Cosonants}]+)$`),
-        "$1$2"
-      );
+      return base.replace(broadeningPattern, "$1$2");
     }
-  } else if (!new RegExp(`[${VowelsBroad}]$`).test(target)) {
+  } else if (!endsWithBroadVowelPattern.test(target)) {
     // Attempt regular broadening instead
     return broaden(base);
   } else {
-    return base.replace(
-      new RegExp(`^(.*[${Vowels}]*[${VowelsSlender}])([${Cosonants}]+)$`),
-      `$1${target}$2`
-    );
+    return base.replace(irregularBroadeningPattern, `$1${target}$2`);
   }
 }
 
@@ -262,30 +271,28 @@ export function broaden(base: string, target?: string): string {
  * and if neither one of them is "l", "n" or "r", then devoices the second one.
  */
 export function devoice(base: string): string {
-  // May need elaboration.
-  // ^ From original code base.
+  // TODO Needs elaboration. Looks like description is unimplemented
   return base.replace(/^(.*)sd$/, "$1st");
 }
 
+const unduplicationPattern = new RegExp(`^(.*([${Consonants}]))\\2$`);
 /**
  * Reduces any duplicated consonants at the end into a single consonant.
  */
 export function unduplicate(base: string): string {
-  return base.match(new RegExp(`^.*[${Cosonants}][${Cosonants}]$`)) != null
-    && base.at(-1) === base.at(-2)
-    ? base.slice(0, -1)
-    : base;
+  return base.replace(unduplicationPattern, "$1");
 }
 
+const syncopePattern = new RegExp(`^(.*[${Consonants}])[${Vowels}]+([${Consonants}]+)$`);
 /**
  * Performs syncope by removing the final vowel cluster,
  * then unduplicates and devoices the consonant cluster at the end.
  */
 export function syncope(base: string): string {
-  const match = base.match(new RegExp(`^(.*[${Cosonants}])?[${Vowels}]+([${Cosonants}]+)$`));
-  return match != null
-    ? devoice(unduplicate((match[1] ?? "") + (match[2] ?? "")))
-    : base;
+  return base.replace(
+    syncopePattern,
+    (_match, p1, p2) => devoice(unduplicate(p1 + p2))
+  );
 }
 
 // HighlightMutations ignored. It is not the goal of this project to produce html at the moment.
