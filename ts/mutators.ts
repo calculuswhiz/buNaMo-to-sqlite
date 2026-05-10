@@ -47,8 +47,10 @@ export function mutate(mutation: Mutation, text: string): string {
         [/^s([rnlaeiouáéíóú].*)$/i, "sh$1"]
       ], text)
       : lenitionVariant === "2"
+        // Same as lenition 1 but leaves "s", "t", "d" unchanged
         ? text.replace(/^([pbmfcg])([^j]*)$/i, "$1h$2")
         : lenitionVariant === "3"
+          // Same as lenition 2 but also changes "s" to "ts" before r, n, l and vowels
           ? performReplacements([
             [/^([pbmfcg])([^j]*)$/i, "$1h$2"],
             [/^s([rnlaeiouáéíóú].*)$/i, "ts$1"]
@@ -59,51 +61,42 @@ export function mutate(mutation: Mutation, text: string): string {
       ? lenited.replace(/^([aeiouáéíóúf])(.*)$/i, "d'$1$2")
       : lenited;
   }
-  else if (mutation === "ecl1") {
-    return performReplacements([
+  else if (mutation.startsWith("ecl")) {
+    const eclipsisVariant = mutation.at(3);
+
+    const commonEclipsis = performReplacements([
       [/^p(.*)$/i, "bp$1"],
       [/^b(.*)$/i, "mb$1"],
       [/^f(.*)$/i, "bhf$1"],
       [/^c(.*)$/i, "gc$1"],
-      [/^g(.*)$/i, "ng$1"],
-      [/^t(.*)$/i, "dt$1"],
-      [/^d(.*)$/i, "nd$1"],
-      [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
-      [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
+      [/^g(.*)$/i, "ng$1"]
     ], text);
-  }
-  else if (mutation === "ecl1x") {
-    // Same as eclipsis 1 but leaves vowels unchanged
-    return performReplacements([
-      [/^p(.*)$/i, "bp$1"],
-      [/^b(.*)$/i, "mb$1"],
-      [/^f(.*)$/i, "bhf$1"],
-      [/^c(.*)$/i, "gc$1"],
-      [/^g(.*)$/i, "ng$1"],
-      [/^t(.*)$/i, "dt$1"],
-      [/^d(.*)$/i, "nd$1"],
-    ], text);
-  }
-  else if (mutation === "ecl2") {
-    // Same as eclipsis 1 but leaves "t", "d" and vowels unchanged
-    return performReplacements([
-      [/^p(.*)$/i, "bp$1"],
-      [/^b(.*)$/i, "mb$1"],
-      [/^f(.*)$/i, "bhf$1"],
-      [/^c(.*)$/i, "gc$1"],
-      [/^g(.*)$/i, "ng$1"],
-    ], text);
-  }
-  else if (mutation === "ecl3") {
-    // Same as eclipsis 2 but also changes "s" to "ts"
-    return performReplacements([
-      [/^p(.*)$/i, "bp$1"],
-      [/^b(.*)$/i, "mb$1"],
-      [/^f(.*)$/i, "bhf$1"],
-      [/^c(.*)$/i, "gc$1"],
-      [/^g(.*)$/i, "ng$1"],
-      [/^s([rnlaeiouáéíóú].*)$/i, "ts$1"],
-    ], text);
+
+    if (commonEclipsis !== text)
+      return commonEclipsis;
+
+    if (eclipsisVariant === "1") {
+      return performReplacements([
+        [/^t(.*)$/i, "dt$1"],
+        [/^d(.*)$/i, "nd$1"],
+        ...(
+          // x subvariant is consonants only
+          !mutation.endsWith("x") ? [
+            [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
+            [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
+          ] as [RegExp, string][] : []
+        )
+      ], commonEclipsis);
+    }
+    else if (eclipsisVariant === "2") {
+      // Same as eclipsis 1 but leaves "t", "d" and vowels unchanged
+      // Covered by commonEclipsis
+      return commonEclipsis;
+    }
+    else {
+      // Same as eclipsis 2 but also changes "s" to "ts"
+      return commonEclipsis.replace(/^s([rnlaeiouáéíóú].*)$/i, "ts$1");
+    }
   }
   else if (mutation === "prefT") {
     return performReplacements([
@@ -171,7 +164,10 @@ const palatalizationReplaceTable = [
   ["io", "i"],
   ["iu", "i"],
   ["ae", "aei"]
-] as const;
+].map(([source, target]) => ([
+  new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+  `$1${target}$2`
+] as [RegExp, string]));
 
 /**
  * If target is not provided:
@@ -189,20 +185,16 @@ const palatalizationReplaceTable = [
  */
 export function slenderize(base: string, target?: string): string {
   if (target === undefined) {
-    for (const [source, target] of palatalizationReplaceTable) {
-      const replacement = base.replace(
-        new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
-        `$1${target}$2`
+    const slenderized = performReplacements(palatalizationReplaceTable, base);
+    if (slenderized !== base)
+      return slenderized;
+    else {
+      // The generic case: insert "i" at the end of the vowel cluster:
+      return base.replace(
+        new RegExp(`^(.*[${VowelsBroad}])([${Cosonants}]+)$`),
+        "$1i$2"
       );
-      if (replacement !== base)
-        return replacement;
     }
-
-    // The generic case: insert "i" at the end of the vowel cluster:
-    return base.replace(
-      new RegExp(`^(.*[${VowelsBroad}])([${Cosonants}]+)$`),
-      "$1i$2"
-    );
   } else if (!new RegExp(`[${VowelsSlender}]$`).test(target)) {
     // Attempt regular slenderization instead
     return slenderize(base);
@@ -224,7 +216,10 @@ const broadenReplaceTable = [
   ["í", "ío"],
   ["ui", "o"],
   ["io", "ea"],
-] as const;
+].map(([source, target]) => ([
+  new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
+  `$1${target}$2`
+] as [RegExp, string]));
 /**
  * If target is not provided:
  *   Performs regular broadening: 
@@ -241,20 +236,16 @@ const broadenReplaceTable = [
  */
 export function broaden(base: string, target?: string): string {
   if (target === undefined) {
-    for (const [source, target] of broadenReplaceTable) {
-      const replacement = base.replace(
-        new RegExp(`^(.*[${Cosonants}])?${source}([${Cosonants}]+)$`),
-        `$1${target}$2`
+    const broadened = performReplacements(broadenReplaceTable, base);
+    if (broadened !== base)
+      return broadened;
+    else {
+      // The generic case: remove "i" from the end of the vowel cluster:
+      return base.replace(
+        new RegExp(`^(.*)i([${Cosonants}]+)$`),
+        "$1$2"
       );
-      if (replacement !== base)
-        return replacement;
     }
-
-    // The generic case: remove "i" from the end of the vowel cluster:
-    return base.replace(
-      new RegExp(`^(.*)i([${Cosonants}]+)$`),
-      "$1$2"
-    );
   } else if (!new RegExp(`[${VowelsBroad}]$`).test(target)) {
     // Attempt regular broadening instead
     return broaden(base);
