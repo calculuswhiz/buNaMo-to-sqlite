@@ -85,6 +85,7 @@ export function mutate(mutation: Mutation, text: string): string {
           mutation.endsWith("x")
             // x subvariant is consonants only
             ? []
+            // vowels get n prefix
             : [
               [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
               [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],

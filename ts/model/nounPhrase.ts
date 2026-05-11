@@ -1,9 +1,9 @@
 import type { Gender, Mutation } from "../features";
-import { mutate } from "../mutators";
+import { emphasize, isSlender, isSlenderI, mutate, prefix, startsFVowel, startsVowel } from "../mutators";
 import type { Adjective } from "./adjective";
 import type { ILexeme } from "./ILexeme";
 import type { Noun } from "./noun";
-import * as mutators from "../mutators";
+import type { Possessive } from "./possessive";
 
 export class NounPhrase implements ILexeme {
   nounPhraseId: number;
@@ -16,7 +16,7 @@ export class NounPhrase implements ILexeme {
   forms: { [key in NounPhraseFormName]: NounPhraseForm[] };
 
   constructor(props: {
-    nounPhraseId: number,
+    nounPhraseId?: number,
     isDefinite: boolean,
     isPossessed: boolean,
     isImmutable: boolean,
@@ -24,7 +24,7 @@ export class NounPhrase implements ILexeme {
     disambig: string,
     forms?: { [key in NounPhraseFormName]?: NounPhraseForm[] }
   }) {
-    this.nounPhraseId = props.nounPhraseId;
+    this.nounPhraseId = props.nounPhraseId ?? -1;
     this.isDefinite = props.isDefinite;
     this.isPossessed = props.isPossessed;
     this.isImmutable = props.isImmutable;
@@ -47,257 +47,346 @@ export class NounPhrase implements ILexeme {
     };
   }
 
+  /** Adds a possessive pronoun to sgNom, sgDat, sgGen, plNom, plDat, plGen of itself, empties all other forms
+   * Ported from private method of same name in NounPhrase.cs.
+   */
+  makePossessive(possessive: Possessive) {
+    this.isDefinite = true;
+    this.isPossessed = true;
+
+    for (const headForm of this.forms.sgNom) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    for (const headForm of this.forms.sgDat) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    for (const headForm of this.forms.sgGen) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    for (const headForm of this.forms.plNom) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    for (const headForm of this.forms.plDat) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    for (const headForm of this.forms.plGen) {
+      if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
+        for (const possForm of possessive.forms.apos) {
+          headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
+        }
+      }
+      else {
+        for (const possForm of possessive.forms.full) {
+          headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
+        }
+      }
+    }
+
+    this.forms.sgDatArtN = [];
+    this.forms.sgDatArtS = [];
+    this.forms.sgGenArt = [];
+    this.forms.sgNomArt = [];
+    this.forms.plDatArt = [];
+    this.forms.plGenArt = [];
+    this.forms.plNomArt = [];
+  }
+
   // Ported from Noun-arg constructor
   static fromNoun(head: Noun): NounPhrase {
     const nounPhrase = new NounPhrase({
-      nounPhraseId: -1,
       isDefinite: head.isDefinite,
       isPossessed: false,
       isImmutable: head.isImmutable,
       forceNominative: false,
       disambig: "",
-      forms: {
-        sgNom: head.forms.sgNom
-          .map(headForm =>
-            new NounPhraseForm(
-              -1, -1,
-              "sgNom",
-              headForm.value,
-              headForm.gender ?? null
-            )
-          ),
-        sgNomArt: !head.isDefinite
-          ? head.forms.sgNom
-            .map(headForm => {
-              const mutation: Mutation = head.isImmutable
-                ? "none"
-                : headForm.gender === "masc" ? "prefT" : "len3";
-              return new NounPhraseForm(
-                -1, -1,
-                "sgNomArt",
-                `an ${mutate(mutation, headForm.value)}`,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        sgGen: head.forms.sgGen
-          .map(headForm => {
-            const mutation: Mutation = head.isImmutable
-              ? "none"
-              : head.isProper
-                ? "len1" : "none";
-            return new NounPhraseForm(
-              -1, -1,
-              "sgGen",
-              mutate(mutation, headForm.value),
-              headForm.gender ?? null
-            );
-          }),
-        sgGenArt: !head.isDefinite || head.allowArticledGenitive
-          ? head.forms.sgGen
-            .map(headForm => {
-              const mutation: Mutation = head.isImmutable
-                ? "none"
-                : head.isProper
-                  ? "len3" : "prefH";
-              return new NounPhraseForm(
-                -1, -1,
-                "sgGenArt",
-                `${headForm.gender === "masc" ? "an" : "na"} ${mutate(mutation, headForm.value)}`,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        plNom: head.forms.plNom
-          .map(headForm => {
-            return new NounPhraseForm(
-              -1, -1,
-              "plNom",
-              headForm.value,
-              headForm.gender ?? null
-            );
-          }),
-        plNomArt: !head.isDefinite
-          ? head.forms.plNom
-            .map(headForm => {
-              const mutation: Mutation = head.isImmutable
-                ? "none"
-                : "prefH";
-              return new NounPhraseForm(
-                -1, -1,
-                "plNomArt",
-                `na ${mutate(mutation, headForm.value)}`,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        plGen: head.forms.plGen
-          .map(headForm => {
-            const mutation: Mutation = head.isImmutable
-              ? "none"
-              : head.isProper
-                ? "len1" : "none";
-            return new NounPhraseForm(
-              -1, -1,
-              "plGen",
-              mutate(mutation, headForm.value),
-              headForm.gender ?? null
-            );
-          }),
-        plGenArt: !head.isDefinite || head.allowArticledGenitive
-          ? head.forms.plGen
-            .map(headForm => {
-              const mutation: Mutation = head.isImmutable
-                ? "none"
-                : "ecl1";
-              return new NounPhraseForm(
-                -1, -1,
-                "plGenArt",
-                `na ${mutate(mutation, headForm.value)}`,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        sgDat: head.forms.sgDat
-          .map(headForm => {
-            return new NounPhraseForm(
-              -1, -1,
-              "sgDat",
-              headForm.value,
-              headForm.gender ?? null
-            );
-          }),
-        sgDatArtN: !head.isDefinite
-          ? head.forms.sgDat
-            .map(headForm => {
-              return new NounPhraseForm(
-                -1, -1,
-                "sgDatArtN",
-                headForm.value,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        sgDatArtS: !head.isDefinite
-          ? head.forms.sgDat
-            .map(headForm => {
-              return new NounPhraseForm(
-                -1, -1,
-                "sgDatArtS",
-                headForm.value,
-                headForm.gender ?? null
-              );
-            })
-          : [],
-        plDat: head.forms.plNom
-          .map(headForm => {
-            return new NounPhraseForm(
-              -1, -1,
-              "plDat",
-              headForm.value,
-              headForm.gender ?? null
-            );
-          }),
-        plDatArt: !head.isDefinite
-          ? head.forms.plNom
-            .map(headForm => {
-              return new NounPhraseForm(
-                -1, -1,
-                "plDatArt",
-                headForm.value,
-                headForm.gender ?? null
-              );
-            })
-          : []
-      }
     });
+    nounPhrase.isDefinite = head.isDefinite;
+    nounPhrase.isImmutable = head.isImmutable;
+
+    for (const headForm of head.forms.sgNom) {
+      nounPhrase.forms.sgNom.push(new NounPhraseForm({
+        formName: "sgNom",
+        value: headForm.value,
+        gender: headForm.gender
+      }));
+
+      if (!head.isDefinite) {
+        const mut: Mutation = head.isImmutable
+          ? "none"
+          : headForm.gender === "masc" ? "prefT" : "len3";
+
+        nounPhrase.forms.sgNomArt.push(
+          new NounPhraseForm({
+            formName: "sgNomArt",
+            value: `an ${mutate(mut, headForm.value)}`,
+            gender: headForm.gender
+          })
+        );
+      }
+    }
+
+    for (const headForm of head.forms.sgGen) {
+      const mut: Mutation = head.isImmutable
+        ? "none"
+        // Proper nouns are always lenited in the genitive
+        : head.isProper ? "len1" : "none";
+      nounPhrase.forms.sgGen.push(
+        new NounPhraseForm({
+          formName: "sgGen",
+          value: mutate(mut, headForm.value),
+          gender: headForm.gender
+        })
+      );
+
+      if (!head.isDefinite || head.allowArticledGenitive) {
+        const mut: Mutation = head.isImmutable
+          ? "none"
+          : headForm.gender === "masc" ? "len3" : "prefH";
+        const article = headForm.gender === "masc" ? "an" : "na";
+        nounPhrase.forms.sgGenArt.push(
+          new NounPhraseForm({
+            formName: "sgGenArt",
+            value: `${article} ${mutate(mut, headForm.value)}`,
+            gender: headForm.gender
+          })
+        );
+      }
+    }
+
+    for (const headForm of head.forms.plNom) {
+      nounPhrase.forms.plNom.push(new NounPhraseForm({
+        formName: "plNom",
+        value: headForm.value,
+        gender: headForm.gender
+      }));
+
+      if (!head.isDefinite) {
+        const mut: Mutation = head.isImmutable ? "none" : "prefH";
+        nounPhrase.forms.plNomArt.push(
+          new NounPhraseForm({
+            formName: "plNomArt",
+            value: `na ${mutate(mut, headForm.value)}`,
+            gender: headForm.gender
+          })
+        );
+      }
+    }
+
+    for (const headForm of head.forms.plGen) {
+      // Proper nouns are always lenited in the articleless genitive
+      const mut: Mutation = head.isImmutable
+        ? "none"
+        : head.isProper ? "len1" : "none";
+      nounPhrase.forms.plGen.push(
+        new NounPhraseForm({
+          formName: "plGen",
+          value: mutate(mut, headForm.value),
+          gender: headForm.gender
+        })
+      );
+
+      if (!head.isDefinite || head.allowArticledGenitive) {
+        const mut: Mutation = head.isImmutable ? "none" : "ecl1";
+        nounPhrase.forms.plGenArt.push(
+          new NounPhraseForm({
+            formName: "plGenArt",
+            value: `na ${mutate(mut, headForm.value)}`,
+            gender: headForm.gender
+          })
+        );
+      }
+    }
+
+    for (const headForm of head.forms.sgDat) {
+      nounPhrase.forms.sgDat.push(new NounPhraseForm({
+        formName: "sgDat",
+        value: headForm.value,
+        gender: headForm.gender
+      }));
+
+      if (!head.isDefinite) {
+        nounPhrase.forms.sgDatArtN.push(new NounPhraseForm({
+          formName: "sgDatArtN",
+          value: headForm.value,
+          gender: headForm.gender
+        }));
+        nounPhrase.forms.sgDatArtS.push(new NounPhraseForm({
+          formName: "sgDatArtS",
+          value: headForm.value,
+          gender: headForm.gender
+        }));
+      }
+    }
+
+    for (const headForm of head.forms.plNom) {
+      nounPhrase.forms.plDat.push(new NounPhraseForm({
+        formName: "plDat",
+        value: headForm.value,
+        gender: headForm.gender
+      }));
+
+      if (!head.isDefinite) {
+        nounPhrase.forms.plDatArt.push(new NounPhraseForm({
+          formName: "plDatArt",
+          value: headForm.value,
+          gender: headForm.gender
+        }));
+      }
+    }
 
     return nounPhrase;
   }
 
   // Ported from Noun+Adjective constructor
-  static fromNounWithAdjective(head: Noun, modifier: Adjective): NounPhrase {
+  static fromModifiedNoun(head: Noun, modifier: Adjective, possessive?: Possessive): NounPhrase {
     if (modifier.isPre) {
       const prefixedHead = head.clone();
-      const prefix = modifier.getLemma();
+      const prefixLemma = modifier.getLemma();
 
       for (const f of prefixedHead.forms.sgNom)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.sgGen)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.sgDat)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.sgVoc)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.plNom)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.plGen)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.plVoc)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
       for (const f of prefixedHead.forms.count)
-        f.value = mutators.prefix(prefix, f.value);
+        f.value = prefix(prefixLemma, f.value);
 
-      return NounPhrase.fromNoun(prefixedHead);
+      return possessive == null
+        ? NounPhrase.fromNoun(prefixedHead)
+        : NounPhrase.fromPossessedNoun(prefixedHead, possessive);
     } else {
       const nounPhrase = new NounPhrase({
         isDefinite: head.isDefinite,
         isImmutable: head.isImmutable,
         forceNominative: true,
         isPossessed: false,
-        disambig: "",
-        nounPhraseId: -1,
+        disambig: ""
       });
 
       for (const headForm of head.forms.sgNom) {
         for (const modForm of modifier.forms.sgNom) {
-          const mutA: Mutation = headForm.gender == "masc" ? "none" : "len1";
-          const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+          const mutA: Mutation = headForm.gender === "masc" ? "none" : "len1";
+          const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.sgNom.push(
-            new NounPhraseForm(-1, -1, "sgNom", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "sgNom",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
 
         if (!head.isDefinite) {
           for (const modForm of modifier.forms.sgNom) {
-            let mutN: Mutation = headForm.gender == "masc" ? "prefT" : "len3";
+            let mutN: Mutation = headForm.gender === "masc" ? "prefT" : "len3";
             if (head.isImmutable)
               mutN = "none";
-            const mutA: Mutation = headForm.gender == "masc" ? "none" : "len1";
-            const value = `an ${mutators.mutate(mutN, headForm.value)} ${mutators.mutate(mutA, modForm.value)}`;
+            const mutA: Mutation = headForm.gender === "masc" ? "none" : "len1";
+            const value = `an ${mutate(mutN, headForm.value)} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.sgNomArt.push(
-              new NounPhraseForm(-1, -1, "sgNomArt", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "sgNomArt",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
       }
 
       for (const headForm of head.forms.sgGen) {
-        const modForms = headForm.gender == "masc" ? modifier.forms.sgGenMasc : modifier.forms.sgGenFem;
+        const modForms = headForm.gender === "masc" ? modifier.forms.sgGenMasc : modifier.forms.sgGenFem;
         for (const modForm of modForms) {
           let mutN: Mutation = head.isProper ? "len1" : "none"; //proper nouns are always lenited in the genitive
           if (head.isImmutable)
             mutN = "none";
-          const mutA: Mutation = headForm.gender == "masc" ? "len1" : "none";
-          const value = `${mutators.mutate(mutN, headForm.value)} ${mutators.mutate(mutA, modForm.value)}`;
+          const mutA: Mutation = headForm.gender === "masc" ? "len1" : "none";
+          const value = `${mutate(mutN, headForm.value)} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.sgGen.push(
-            new NounPhraseForm(-1, -1, "sgGen", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "sgGen",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
 
       }
       for (const headForm of head.forms.sgGen) {
         if (!head.isDefinite || head.allowArticledGenitive) {
-          const modForms = headForm.gender == "masc" ? modifier.forms.sgGenMasc : modifier.forms.sgGenFem;
+          const modForms = headForm.gender === "masc" ? modifier.forms.sgGenMasc : modifier.forms.sgGenFem;
           for (const modForm of modForms) {
-            let mutN: Mutation = headForm.gender == "masc" ? "len3" : "prefH";
+            let mutN: Mutation = headForm.gender === "masc" ? "len3" : "prefH";
             if (head.isImmutable)
               mutN = "none";
-            const mutA: Mutation = headForm.gender == "masc" ? "len1" : "none";
-            const article = headForm.gender == "masc" ? "an" : "na";
-            const value = `${article} ${mutators.mutate(mutN, headForm.value)} ${mutators.mutate(mutA, modForm.value)}`;
+            const mutA: Mutation = headForm.gender === "masc" ? "len1" : "none";
+            const article = headForm.gender === "masc" ? "an" : "na";
+            const value = `${article} ${mutate(mutN, headForm.value)} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.sgGenArt.push(
-              new NounPhraseForm(-1, -1, "sgGenArt", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "sgGenArt",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
@@ -305,11 +394,15 @@ export class NounPhrase implements ILexeme {
 
       for (const headForm of head.forms.plNom) {
         for (const modForm of modifier.forms.plNom) {
-          const mutA: Mutation = mutators.isSlender(headForm.value)
+          const mutA: Mutation = isSlender(headForm.value)
             ? "len1" : "none";
-          const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+          const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.plNom.push(
-            new NounPhraseForm(-1, -1, "plNom", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "plNom",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
 
@@ -318,42 +411,54 @@ export class NounPhrase implements ILexeme {
             let mutN: Mutation = "prefH";
             if (head.isImmutable)
               mutN = "none";
-            const mutA: Mutation = mutators.isSlender(headForm.value) ? "len1" : "none";
-            const value = `na ${mutators.mutate(mutN, headForm.value)} ${mutators.mutate(mutA, modForm.value)}`;
+            const mutA: Mutation = isSlender(headForm.value) ? "len1" : "none";
+            const value = `na ${mutate(mutN, headForm.value)} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.plNomArt.push(
-              new NounPhraseForm(-1, -1, "plNomArt", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "plNomArt",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
       }
 
       for (const headForm of head.forms.plGen) {
-        const modForms = headForm.strength == "strong" ? modifier.forms.plNom : modifier.forms.sgNom;
+        const modForms = headForm.strength === "strong" ? modifier.forms.plNom : modifier.forms.sgNom;
         for (const modForm of modForms) {
-          let mutA: Mutation = mutators.isSlender(headForm.value) ? "len1" : "none";
-          if (headForm.strength == "weak")
+          let mutA: Mutation = isSlender(headForm.value) ? "len1" : "none";
+          if (headForm.strength === "weak")
             //"Gael", "captaen" are not slender
-            mutA = mutators.isSlenderI(headForm.value) ? "len1" : "none";
-          const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+            mutA = isSlenderI(headForm.value) ? "len1" : "none";
+          const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.plGen.push(
-            new NounPhraseForm(-1, -1, "plGen", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "plGen",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
       }
       for (const headForm of head.forms.plGen) {
         if (!head.isDefinite || head.allowArticledGenitive) {
-          const modForms = headForm.strength == "strong" ? modifier.forms.plNom : modifier.forms.sgNom;
+          const modForms = headForm.strength === "strong" ? modifier.forms.plNom : modifier.forms.sgNom;
           for (const modForm of modForms) {
             let mutN: Mutation = "len1";
             if (head.isImmutable)
               mutN = "none";
-            let mutA: Mutation = mutators.isSlender(headForm.value) ? "len1" : "none";
-            if (headForm.strength == "weak")
+            let mutA: Mutation = isSlender(headForm.value) ? "len1" : "none";
+            if (headForm.strength === "weak")
               //"Gael", "captaen" are not slender
-              mutA = mutators.isSlenderI(headForm.value) ? "len1" : "none";
-            const value = `na ${mutators.mutate(mutN, headForm.value)} ${mutators.mutate(mutA, modForm.value)}`;
+              mutA = isSlenderI(headForm.value) ? "len1" : "none";
+            const value = `na ${mutate(mutN, headForm.value)} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.plGenArt.push(
-              new NounPhraseForm(-1, -1, "plGenArt", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "plGenArt",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
@@ -361,25 +466,37 @@ export class NounPhrase implements ILexeme {
 
       for (const headForm of head.forms.sgDat) {
         for (const modForm of modifier.forms.sgNom) {
-          const mutA: Mutation = headForm.gender == "masc" ? "none" : "len1";
-          const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+          const mutA: Mutation = headForm.gender === "masc" ? "none" : "len1";
+          const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.sgDat.push(
-            new NounPhraseForm(-1, -1, "sgDat", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "sgDat",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
 
         if (!head.isDefinite) {
           for (const modForm of modifier.forms.sgNom) {
-            const mutA: Mutation = headForm.gender == "masc" ? "none" : "len1";
-            const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+            const mutA: Mutation = headForm.gender === "masc" ? "none" : "len1";
+            const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.sgDatArtS.push(
-              new NounPhraseForm(-1, -1, "sgDatArtS", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "sgDatArtS",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
           for (const modForm of modifier.forms.sgNom) {
-            const value = `${headForm.value} ${mutators.mutate("len1", modForm.value)}`;
+            const value = `${headForm.value} ${mutate("len1", modForm.value)}`;
             nounPhrase.forms.sgDatArtN.push(
-              new NounPhraseForm(-1, -1, "sgDatArtN", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "sgDatArtN",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
@@ -387,26 +504,59 @@ export class NounPhrase implements ILexeme {
 
       for (const headForm of head.forms.plNom) {
         for (const modForm of modifier.forms.plNom) {
-          const mutA: Mutation = mutators.isSlender(headForm.value) ? "len1" : "none";
-          const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+          const mutA: Mutation = isSlender(headForm.value) ? "len1" : "none";
+          const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
           nounPhrase.forms.plDat.push(
-            new NounPhraseForm(-1, -1, "plDat", value, headForm.gender)
+            new NounPhraseForm({
+              formName: "plDat",
+              value: value,
+              gender: headForm.gender
+            })
           );
         }
 
         if (!head.isDefinite) {
           for (const modForm of modifier.forms.plNom) {
-            const mutA: Mutation = mutators.isSlender(headForm.value) ? "len1" : "none";
-            const value = `${headForm.value} ${mutators.mutate(mutA, modForm.value)}`;
+            const mutA: Mutation = isSlender(headForm.value) ? "len1" : "none";
+            const value = `${headForm.value} ${mutate(mutA, modForm.value)}`;
             nounPhrase.forms.plDatArt.push(
-              new NounPhraseForm(-1, -1, "plDatArt", value, headForm.gender)
+              new NounPhraseForm({
+                formName: "plDatArt",
+                value: value,
+                gender: headForm.gender
+              })
             );
           }
         }
       }
 
+      if (possessive != null)
+        nounPhrase.makePossessive(possessive);
+
       return nounPhrase;
     }
+  }
+
+  // Ported from Adjective and Possessive-arg constructors
+  static fromPossessedNoun(head: Noun, possessive: Possessive, shouldEmphasize = false): NounPhrase {
+    const nounPhrase = NounPhrase.fromNoun(head);
+    nounPhrase.makePossessive(possessive);
+    if (shouldEmphasize) {
+      for (const form of nounPhrase.forms.sgNom)
+        form.value = emphasize(form.value, possessive.emphasizer);
+      for (const form of nounPhrase.forms.sgDat)
+        form.value = emphasize(form.value, possessive.emphasizer);
+      for (const form of nounPhrase.forms.sgGen)
+        form.value = emphasize(form.value, possessive.emphasizer);
+      for (const form of nounPhrase.forms.plNom)
+        form.value = emphasize(form.value, possessive.emphasizer);
+      for (const form of nounPhrase.forms.plDat)
+        form.value = emphasize(form.value, possessive.emphasizer);
+      for (const form of nounPhrase.forms.plGen)
+        form.value = emphasize(form.value, possessive.emphasizer);
+    }
+
+    return nounPhrase;
   }
 
   getLemma(): string {
@@ -419,7 +569,7 @@ export class NounPhrase implements ILexeme {
 
   getNickname(): string {
     const lemma = this.getLemma();
-    const disambigPart = this.disambig != "" ? `_${this.disambig}` : "";
+    const disambigPart = this.disambig !== "" ? `_${this.disambig}` : "";
     return `${lemma}_NP${disambigPart}`;
   }
 
@@ -429,9 +579,10 @@ export class NounPhrase implements ILexeme {
   }
 
   hasGender(): boolean {
-    return this.getGender() !== null;
+    return this.getGender() != null;
   }
 }
+
 
 export type NounPhraseFormName = "sgNom" | "sgGen" |
   "sgNomArt" | "sgGenArt" |
@@ -447,17 +598,17 @@ export class NounPhraseForm {
   value: string;
   gender: Gender | null;
 
-  constructor(
-    nounPhraseFormId: number,
-    nounPhraseId: number,
+  constructor(props: {
+    nounPhraseFormId?: number,
+    nounPhraseId?: number,
     formName: NounPhraseFormName,
     value: string,
     gender: Gender | null
-  ) {
-    this.nounPhraseFormId = nounPhraseFormId;
-    this.nounPhraseId = nounPhraseId;
-    this.formName = formName;
-    this.value = value;
-    this.gender = gender;
+  }) {
+    this.nounPhraseFormId = props.nounPhraseFormId ?? -1;
+    this.nounPhraseId = props.nounPhraseId ?? -1;
+    this.formName = props.formName;
+    this.value = props.value;
+    this.gender = props.gender;
   }
 }
