@@ -50,15 +50,15 @@ export class PrepositionForm {
   formName: PrepositionFormName;
   value: string;
 
-  constructor(
-    prepositionFormId: number,
+  constructor(props: {
+    prepositionFormId?: number,
     prepositionId: number,
     formName: PrepositionFormName,
     value: string
-  ) {
-    this.prepositionFormId = prepositionFormId;
-    this.prepositionId = prepositionId;
-    this.formName = formName;
-    this.value = value;
+  }) {
+    this.prepositionFormId = props.prepositionFormId ?? -1;
+    this.prepositionId = props.prepositionId;
+    this.formName = props.formName;
+    this.value = props.value;
   }
 }

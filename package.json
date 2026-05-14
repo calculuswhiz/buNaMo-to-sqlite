@@ -12,7 +12,8 @@
     "rebuild": "tsx ts/build.ts --rebuild",
     "testReads": "tsx ts/test/testReads.ts",
     "testMutators": "tsx ts/test/testMutators.ts",
-    "testVerbConjugations": "tsx ts/test/testVerbConjugations.ts"
+    "testVerbConjugations": "tsx ts/test/testVerbConjugations.ts",
+    "testSgPl": "tsx ts/test/testSgPl.ts"
   },
   "dependencies": {
     "@types/node": "^25.6.0",

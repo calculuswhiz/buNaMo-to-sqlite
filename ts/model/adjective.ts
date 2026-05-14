@@ -1,16 +1,9 @@
 import { mutate } from "../mutators";
 import type { IFriendlyNickNamed, ILexeme } from "./ILexeme";
 
-export interface IAdjective {
+export class Adjective implements ILexeme, IFriendlyNickNamed {
   adjectiveId: number;
   /** The adjective's traditional declension class; default is 0 meaning none or unknown: */
-  declension: number;
-  isPre: boolean;
-  disambig: string;
-}
-
-export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
-  adjectiveId: number;
   declension: number = 0;
   isPre: boolean;
   disambig: string;
@@ -18,13 +11,13 @@ export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
   forms: { [key in AdjectiveFormName]: AdjectiveForm[] };
 
   constructor(props: {
-    adjectiveId: number,
+    adjectiveId?: number,
     declension: number,
     isPre: boolean,
     disambig: string,
     forms?: { [key in AdjectiveFormName]?: AdjectiveForm[] }
   }) {
-    this.adjectiveId = props.adjectiveId;
+    this.adjectiveId = props.adjectiveId ?? -1;
     this.declension = props.declension;
     this.isPre = props.isPre;
     this.disambig = props.disambig;
@@ -81,9 +74,9 @@ export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
       if (/^[aeiouáéíóú]/i.test(gradedForm.value))
         forms.push("ní b'" + gradedForm.value);
       else if (/^f[aeiouáéíóú]/i.test(gradedForm.value))
-        forms.push("ní b'" + mutate("len1", gradedForm.value));
+        forms.push(`ní b'${mutate("len1", gradedForm.value)}`);
       else
-        forms.push("ní ba " + mutate("len1", gradedForm.value));
+        forms.push(`ní ba ${mutate("len1", gradedForm.value)}`);
     }
     return forms;
   }
@@ -93,12 +86,12 @@ export class Adjective implements IAdjective, ILexeme, IFriendlyNickNamed {
     const forms = new Array<string>();
     for (const gradedForm of this.forms.graded) {
       if (/^[aeiouáéíóú]/i.test(gradedForm.value))
-        forms.push("ab " + gradedForm.value);
+        forms.push(`ab ${gradedForm.value}`);
       // Possible typo? Original not case sensitive
       else if (/^f/.test(gradedForm.value))
-        forms.push("ab " + mutate("len1", gradedForm.value));
+        forms.push(`ab ${mutate("len1", gradedForm.value)}`);
       else
-        forms.push("ba " + mutate("len1", gradedForm.value));
+        forms.push(`ba ${mutate("len1", gradedForm.value)}`);
     }
     return forms;
   }
@@ -118,15 +111,15 @@ export class AdjectiveForm {
   formName: AdjectiveFormName;
   value: string;
 
-  constructor(
-    adjectiveFormId: number,
+  constructor(props: {
+    adjectiveFormId?: number,
     adjectiveId: number,
     formName: AdjectiveFormName,
     value: string
-  ) {
-    this.adjectiveFormId = adjectiveFormId;
-    this.adjectiveId = adjectiveId;
-    this.formName = formName;
-    this.value = value;
+  }) {
+    this.adjectiveFormId = props.adjectiveFormId ?? -1;
+    this.adjectiveId = props.adjectiveId;
+    this.formName = props.formName;
+    this.value = props.value;
   }
 }

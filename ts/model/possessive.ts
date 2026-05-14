@@ -54,15 +54,15 @@ export class PossessiveForm {
   formName: PossessiveFormName;
   value: string;
 
-  constructor(
-    possessiveFormId: number,
+  constructor(props: {
+    possessiveFormId?: number,
     possessiveId: number,
     formName: PossessiveFormName,
     value: string
-  ) {
-    this.possessiveFormId = possessiveFormId;
-    this.possessiveId = possessiveId;
-    this.formName = formName;
-    this.value = value;
+  }) {
+    this.possessiveFormId = props.possessiveFormId ?? -1;
+    this.possessiveId = props.possessiveId;
+    this.formName = props.formName;
+    this.value = props.value;
   }
 }

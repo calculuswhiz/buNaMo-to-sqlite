@@ -13,7 +13,7 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
   forms: { [key in NounFormName]: NounForm[] };
 
   constructor(props: {
-    nounId: number,
+    nounId?: number,
     declension: number,
     isProper: boolean,
     isImmutable: boolean,
@@ -22,7 +22,7 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
     disambig: string,
     forms?: { [key in NounFormName]?: NounForm[] }
   }) {
-    this.nounId = props.nounId;
+    this.nounId = props.nounId ?? -1;
     this.declension = props.declension;
     this.isProper = props.isProper;
     this.isImmutable = props.isImmutable;
@@ -43,14 +43,14 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
     // Inlined AddDative. Ensures that noun has dative singular form
     if (this.forms.sgDat.length === 0) {
       for (const sgNomForm of this.forms.sgNom) {
-        this.forms.sgDat.push(new NounForm(
-          sgNomForm.nounFormId,
-          sgNomForm.nounId,
-          "sgDat",
-          sgNomForm.value,
-          sgNomForm.gender,
-          sgNomForm.strength
-        ));
+        this.forms.sgDat.push(new NounForm({
+          nounFormId: sgNomForm.nounFormId,
+          nounId: sgNomForm.nounId,
+          formName: "sgDat",
+          value: sgNomForm.value,
+          gender: sgNomForm.gender,
+          strength: sgNomForm.strength
+        }));
       }
     }
   }
@@ -96,19 +96,19 @@ export class NounForm {
   gender: Gender | null;
   strength: Strength | null;
 
-  constructor(
-    nounFormId: number,
+  constructor(props: {
+    nounFormId?: number,
     nounId: number,
     formName: NounFormName,
     value: string,
     gender: Gender | null,
     strength: Strength | null
-  ) {
-    this.nounFormId = nounFormId;
-    this.nounId = nounId;
-    this.formName = formName;
-    this.value = value;
-    this.gender = gender;
-    this.strength = strength;
+  }) {
+    this.nounFormId = props.nounFormId ?? -1;
+    this.nounId = props.nounId;
+    this.formName = props.formName;
+    this.value = props.value;
+    this.gender = props.gender;
+    this.strength = props.strength;
   }
 }

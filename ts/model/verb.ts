@@ -648,8 +648,8 @@ export class VerbForm {
   mood: Mood;
   person: Person | null;
 
-  constructor(
-    verbFormId: number,
+  constructor(props: {
+    verbFormId?: number,
     verbId: number,
     formType: string,
     value: string,
@@ -657,15 +657,15 @@ export class VerbForm {
     dependency: Dependency | null,
     mood: Mood,
     person: Person | null
-  ) {
-    this.verbFormId = verbFormId;
-    this.verbId = verbId;
-    this.formType = formType;
-    this.value = value;
-    this.tense = tense;
-    this.dependency = dependency;
-    this.mood = mood;
-    this.person = person;
+  }) {
+    this.verbFormId = props.verbFormId ?? -1;
+    this.verbId = props.verbId;
+    this.formType = props.formType;
+    this.value = props.value;
+    this.tense = props.tense;
+    this.dependency = props.dependency;
+    this.mood = props.mood;
+    this.person = props.person;
   }
 }
 

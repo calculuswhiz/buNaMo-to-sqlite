@@ -8,3 +8,4 @@ export type Strength = "strong" | "weak";
 export type Number = "sg" | "pl";
 export type Gender = "masc" | "fem";
 export type Emphasizer = "saSe" | "sanSean" | "naNe";
+export type GrammaticalCase = "Nominative" | "Genitive" | "Vocative" | "Dative";

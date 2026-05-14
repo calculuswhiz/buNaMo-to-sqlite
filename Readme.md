@@ -28,6 +28,8 @@ There are a few breaking changes if you are used to working with the original Bu
 ### Differences between TS library and Gramadan library
 
 - Verb forms are not all calculated upon construction of a verb. Instead, call the conjugation methods to obtain them. If you really want an array of all conjugations, you can do `Array.from(verb.conjugateAll())` or `[...verb.conjugateAll()]`.
+- Singular information is now functional and not a class.
+- Plural information is now functional and not a class. Important: since strength is implicitly tied to the function name, it is not necessary to return that information.
 - XML generation methods have not been implemented (yet?).
 
 ## Usage
