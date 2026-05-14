@@ -4,7 +4,7 @@ type _Ok<T> = { readonly isOk: true, readonly value: T };
 type _Err<T> = { readonly isOk: false, readonly error: T };
 type _Result<T, E> = _Ok<T> | _Err<E>;
 
-export interface IResult<T, E> {
+interface IResult<T, E> {
   unwrapOr<U>(defaultValue: U): T | U;
   mapIfOk<U>(fn: (arg: T) => U): Result<U, E>;
 };
@@ -16,7 +16,9 @@ export type Err<E> = Result<never, E>;
 function result<T = never, E = never>(init: _Result<T, E>): Result<T, E> {
   return {
     ...init,
+    /** Unwrap the result if it is Ok, otherwise return the default value */
     unwrapOr: d => init.isOk ? init.value : d,
+    /** Map the result if it is Ok, otherwise return the original Err */
     mapIfOk: fn => init.isOk ? ok(fn(init.value)) : err(init.error)
   };
 }

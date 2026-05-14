@@ -408,6 +408,8 @@ export class Repository {
 
     if (!rawNounsResult.isOk)
       return err(rawNounsResult.error);
+    else if (rawNounsResult.value.length === 0)
+      return err(new Error(`No noun found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(this.readers.getNounForms, uninitializedErrorMessage);
 
