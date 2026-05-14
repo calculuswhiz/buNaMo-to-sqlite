@@ -98,14 +98,14 @@ export class NounForm {
 
   constructor(props: {
     nounFormId?: number,
-    nounId: number,
+    nounId?: number,
     formName: NounFormName,
     value: string,
     gender: Gender | null,
     strength: Strength | null
   }) {
     this.nounFormId = props.nounFormId ?? -1;
-    this.nounId = props.nounId;
+    this.nounId = props.nounId ?? -1;
     this.formName = props.formName;
     this.value = props.value;
     this.gender = props.gender;

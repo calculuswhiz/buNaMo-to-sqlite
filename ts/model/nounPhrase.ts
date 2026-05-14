@@ -56,79 +56,65 @@ export class NounPhrase implements ILexeme {
 
     for (const headForm of this.forms.sgNom) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
 
     for (const headForm of this.forms.sgDat) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
-
     for (const headForm of this.forms.sgGen) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
-
     for (const headForm of this.forms.plNom) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
 
     for (const headForm of this.forms.plDat) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
 
     for (const headForm of this.forms.plGen) {
       if (possessive.forms.apos.length > 0 && (startsVowel(headForm.value) || startsFVowel(headForm.value))) {
-        for (const possForm of possessive.forms.apos) {
+        for (const possForm of possessive.forms.apos)
           headForm.value = possForm.value + mutate(possessive.mutation, headForm.value);
-        }
       }
       else {
-        for (const possForm of possessive.forms.full) {
+        for (const possForm of possessive.forms.full)
           headForm.value = `${possForm.value} ${mutate(possessive.mutation, headForm.value)}`;
-        }
       }
     }
 

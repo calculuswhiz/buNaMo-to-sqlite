@@ -388,12 +388,12 @@ export class Repository {
           value: formRaw.value as string
         };
         adjective.forms[form.formName as AdjectiveFormName].push(
-          new AdjectiveForm(
-            form.adjectiveFormId,
-            adjective.adjectiveId,
-            form.formName as AdjectiveFormName,
-            form.value
-          )
+          new AdjectiveForm({
+            adjectiveFormId: form.adjectiveFormId,
+            adjectiveId: adjective.adjectiveId,
+            formName: form.formName as AdjectiveFormName,
+            value: form.value
+          })
         );
       }
     }
@@ -441,14 +441,14 @@ export class Repository {
           strength: formRaw.strength as Strength | null
         };
         noun.forms[form.formName].push(
-          new NounForm(
-            form.nounFormId,
-            noun.nounId,
-            form.formName,
-            form.value,
-            form.gender,
-            form.strength
-          )
+          new NounForm({
+            nounFormId: form.nounFormId,
+            nounId: noun.nounId,
+            formName: form.formName,
+            value: form.value,
+            gender: form.gender,
+            strength: form.strength
+          })
         );
       }
     }
@@ -496,13 +496,13 @@ export class Repository {
           gender: formRaw.gender as Gender | null
         };
         nounPhrase.forms[form.formName].push(
-          new NounPhraseForm(
-            form.nounPhraseFormId,
-            nounPhrase.nounPhraseId,
-            form.formName,
-            form.value,
-            form.gender
-          )
+          new NounPhraseForm({
+            nounPhraseFormId: form.nounPhraseFormId,
+            nounPhraseId: nounPhrase.nounPhraseId,
+            formName: form.formName,
+            value: form.value,
+            gender: form.gender
+          })
         );
       }
     }
@@ -548,12 +548,12 @@ export class Repository {
           value: formRaw.value as string
         };
         possessive.forms[form.formName].push(
-          new PossessiveForm(
-            form.possessiveFormId,
-            possessive.possessiveId,
-            form.formName,
-            form.value
-          )
+          new PossessiveForm({
+            possessiveFormId: form.possessiveFormId,
+            possessiveId: possessive.possessiveId,
+            formName: form.formName,
+            value: form.value
+          })
         );
       }
     }
@@ -597,12 +597,12 @@ export class Repository {
           value: formRaw.value as string
         };
         preposition.forms[form.formName].push(
-          new PrepositionForm(
-            form.prepositionFormId,
-            preposition.prepositionId,
-            form.formName,
-            form.value
-          )
+          new PrepositionForm({
+            prepositionFormId: form.prepositionFormId,
+            prepositionId: preposition.prepositionId,
+            formName: form.formName,
+            value: form.value
+          })
         );
       }
     }
@@ -650,16 +650,16 @@ export class Repository {
           person: formRaw.person as Person | null
         };
 
-        const newForm = new VerbForm(
-          form.verbFormId,
-          verb.verbId,
-          form.formType,
-          form.value,
-          form.tense,
-          form.dependency,
-          form.mood,
-          form.person
-        );
+        const newForm = new VerbForm({
+          verbFormId: form.verbFormId,
+          verbId: verb.verbId,
+          formType: form.formType,
+          value: form.value,
+          tense: form.tense,
+          dependency: form.dependency,
+          mood: form.mood,
+          person: form.person
+        });
 
         if (form.tense != null && form.dependency != null && form.person != null) {
           verb.forms.tenses[form.tense][form.dependency][form.person]
