@@ -1,5 +1,10 @@
 import type { Emphasizer, Mutation } from "./features";
 
+/*
+  Dev note: do not hard-code captured single letters in replacements.
+  The regexes are case-insensitive, so captured letters must always be in the same case.
+*/
+
 function performReplacements(
   replacements: [RegExp, string][],
   text: string,
@@ -51,13 +56,13 @@ export function mutate(mutation: Mutation, text: string): string {
       ? performReplacements([
         [/^([td])([^j]*)$/i, "$1h$2"],
         // s lenition
-        [/^s([rnlaeiouáéíóú].*)$/i, "sh$1"]
+        [/^(s)([rnlaeiouáéíóú].*)$/i, "$1h$2"]
       ], commonLenition)
       : lenitionVariant === "2"
         // Same as lenition 1 but leaves "s", "t", "d" unchanged. Handled by common
         ? commonLenition
         // Same as lenition 2 but also changes "s" to "ts" before r, n, l and vowels
-        : commonLenition.replace(/^s([rnlaeiouáéíóú].*)$/i, "ts$1");
+        : commonLenition.replace(/^(s)([rnlaeiouáéíóú].*)$/i, "t$1$2");
 
     return mutation === "len1D" || mutation === "len2D" || mutation === "len3D"
       ? lenited.replace(/^([aeiouáéíóúf])(.*)$/i, "d'$1$2")
@@ -67,11 +72,11 @@ export function mutate(mutation: Mutation, text: string): string {
     const eclipsisVariant = mutation.at(3);
 
     const commonEclipsis = performReplacements([
-      [/^p(.*)$/i, "bp$1"],
-      [/^b(.*)$/i, "mb$1"],
-      [/^f(.*)$/i, "bhf$1"],
-      [/^c(.*)$/i, "gc$1"],
-      [/^g(.*)$/i, "ng$1"]
+      [/^(p)(.*)$/i, "b$1$2"],
+      [/^(b)(.*)$/i, "m$1$2"],
+      [/^(f)(.*)$/i, "bh$1$2"],
+      [/^(c)(.*)$/i, "gc$1$2"],
+      [/^(g)(.*)$/i, "ng$1$2"]
     ], text);
 
     if (commonEclipsis !== text)
@@ -79,16 +84,16 @@ export function mutate(mutation: Mutation, text: string): string {
 
     if (eclipsisVariant === "1") {
       return performReplacements([
-        [/^t(.*)$/i, "dt$1"],
-        [/^d(.*)$/i, "nd$1"],
+        [/^(t)(.*)$/i, "dt$1$2"],
+        [/^(d)(.*)$/i, "nd$1$2"],
         ...(
           mutation.endsWith("x")
             // x subvariant is consonants only
             ? []
             // vowels get n prefix
             : [
-              [/^([aeiuoáéíúó])(.*)$/, "n-$1$2"],
-              [/^([AEIUOÁÉÍÚÓ])(.*)$/, "n$1$2"],
+              [/^([aeiouáéíóú])(.*)$/, "n-$1$2"],
+              [/^([AEIOUÁÉÍÓÚ])(.*)$/, "n$1$2"],
             ] as [RegExp, string][]
         )
       ], commonEclipsis);
@@ -100,7 +105,7 @@ export function mutate(mutation: Mutation, text: string): string {
     }
     else {
       // Same as eclipsis 2 but also changes "s" to "ts"
-      return commonEclipsis.replace(/^s([rnlaeiouáéíóú].*)$/i, "ts$1");
+      return commonEclipsis.replace(/^(s)([rnlaeiouáéíóú].*)$/i, "t$1$2");
     }
   }
   else if (mutation === "prefT") {
