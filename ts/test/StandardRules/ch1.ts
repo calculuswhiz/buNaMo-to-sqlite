@@ -6,6 +6,7 @@ import { _nn } from "../../util";
 import { NounPhrase } from "../../model/nounPhrase";
 import { Noun, NounForm } from "../../model/noun";
 import type { Gender } from "../../features";
+import { PrepositionalPhrase } from "../../model/prepositionalPhrase";
 
 const db = getExistingDb(path.join(__dirname, "../../../output/buNaMo.sqlite"));
 const repository = new Repository(db);
@@ -133,6 +134,49 @@ repository.initialize().then(async () => {
 
           const phrase = NounPhrase.fromNoun(noun);
           assert.equal(phrase.forms.sgNomArt[0].value, test[1]);
+        }
+      });
+    });
+
+    await test("1.4 The Dative Singular Case — The Core System", async () => {
+      await test("1.4.1: ...nouns starting with a consonant (other than d, t and s), lenition is applied to them following den, don, sa/san and eclipsis in every other context", () => {
+        const cases = [
+          // Prep, Noun, Modifier, Expected
+          ["ag", "fear", "maith", "ag an bhfear maith"]
+        ];
+
+        for (const test of cases) {
+          const prep = _nn(
+            repository.getPrepositionsByLemma(test[0])
+              .mapIfOk(x => x[0])
+              .unwrapOr(null), `Preposition not found: ${test[0]}`
+          );
+
+          const noun = _nn(
+            repository.getNounsByLemma(test[1])
+              .mapIfOk(x => x[0])
+              .unwrapOr(makeQuickNoun(test[1], "masc")), `Noun not found: ${test[1]}`
+          );
+
+          assert.ok(noun.forms.sgDat.length > 0);
+
+          const adjective = _nn(
+            repository.getAdjectivesByLemma(test[2])
+              .mapIfOk(x => x[0])
+              .unwrapOr(null), `Adjective not found: ${test[2]}`
+          );
+
+          const nounPhrase = NounPhrase.fromModifiedNoun(noun, adjective);
+
+          const prepositionalPhrase = new PrepositionalPhrase(prep, nounPhrase);
+
+          // Standard appears to use the Southern form for the Core System
+          const formResult = prepositionalPhrase.getForm("sgArtS");
+          if (!formResult.isOk) {
+            throw formResult.error;
+          }
+          const form = formResult.value[0];
+          assert.equal(form, test[3]);
         }
       });
     });

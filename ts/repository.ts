@@ -420,19 +420,13 @@ export class Repository {
 
     const nouns: Noun[] = [];
     for (const rawNoun of rawNounsResult.value) {
-      const noun = new Noun({
-        nounId: rawNoun.nounId as number,
-        declension: rawNoun.declension as number,
-        isProper: !!rawNoun.isProper,
-        isImmutable: !!rawNoun.isImmutable,
-        isDefinite: !!rawNoun.isDefinite,
-        allowArticledGenitive: !!rawNoun.allowArticledGenitive,
-        disambig: rawNoun.disambig as string,
-      });
-
-      nouns.push(noun);
-
-      const formsRaw = formsQuery.all({ foundId: noun.nounId });
+      const nounId = rawNoun.nounId as number;
+      const formsRaw = formsQuery.all({ foundId: nounId });
+      const forms: Noun["forms"] = {
+        sgNom: [], sgGen: [], sgVoc: [], sgDat: [],
+        plNom: [], plGen: [], plVoc: [],
+        count: []
+      };
 
       for (const formRaw of formsRaw) {
         const form = {
@@ -442,10 +436,10 @@ export class Repository {
           gender: formRaw.gender as Gender | null,
           strength: formRaw.strength as Strength | null
         };
-        noun.forms[form.formName].push(
+        forms[form.formName].push(
           new NounForm({
             nounFormId: form.nounFormId,
-            nounId: noun.nounId,
+            nounId: nounId,
             formName: form.formName,
             value: form.value,
             gender: form.gender,
@@ -453,6 +447,19 @@ export class Repository {
           })
         );
       }
+
+      const noun = new Noun({
+        nounId: rawNoun.nounId as number,
+        declension: rawNoun.declension as number,
+        isProper: !!rawNoun.isProper,
+        isImmutable: !!rawNoun.isImmutable,
+        isDefinite: !!rawNoun.isDefinite,
+        allowArticledGenitive: !!rawNoun.allowArticledGenitive,
+        disambig: rawNoun.disambig as string,
+        forms: forms
+      });
+
+      nouns.push(noun);
     }
 
     return ok(nouns);

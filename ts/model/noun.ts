@@ -20,7 +20,10 @@ export class Noun implements ILexeme, IFriendlyNickNamed {
     isDefinite: boolean,
     allowArticledGenitive: boolean,
     disambig: string,
-    forms?: { [key in NounFormName]?: NounForm[] }
+    /** Forms must not be null to ensure that the dative form is correctly initialized.
+     * Create forms first.
+     */
+    forms: { [key in NounFormName]?: NounForm[] }
   }) {
     this.nounId = props.nounId ?? -1;
     this.declension = props.declension;
