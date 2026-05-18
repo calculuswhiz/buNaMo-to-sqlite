@@ -30,111 +30,57 @@ repository.initialize().then(async () => {
 
   await test("Chapter 1: Article rules", async () => {
     await test("1.2 The Nominative Case and the Singular Accusative Case", async () => {
+      const getNoun = (lemma: string, backup: Noun | null = null) => _nn(
+        repository.getNounsByLemma(lemma)
+          .mapIfOk(x => x[0])
+          .unwrapOr(backup), `Noun not found: ${lemma}`
+      );
+      const getSgNomArt = (lemma: string | Noun, backup: Noun | null = null) => {
+        const noun = typeof lemma === "string"
+          ? getNoun(lemma, backup)
+          : lemma;
+        return NounPhrase.fromNoun(noun).forms.sgNomArt[0].value;
+      };
+
       await test("Masculine initial consonant does not change", () => {
-        const cases = [
-          "cnoc", "diabhal", "fear", "saol", "Seapánach", "teach"
-        ];
-        for (const lemma of cases) {
-          const noun = _nn(
-            repository.getNounsByLemma(lemma)
-              .mapIfOk(x => x[0])
-              .unwrapOr(null), `Noun not found: ${lemma}`
-          );
-
-          const phrase = NounPhrase.fromNoun(noun);
-
-          assert.equal(phrase.forms.sgNomArt[0].value, `an ${lemma}`);
-        }
+        assert.equal(getSgNomArt("cnoc"), "an cnoc");
+        assert.equal(getSgNomArt("diabhal"), "an diabhal");
+        assert.equal(getSgNomArt("fear"), "an fear");
+        assert.equal(getSgNomArt("saol"), "an saol");
+        assert.equal(getSgNomArt("Seapánach"), "an Seapánach");
+        assert.equal(getSgNomArt("teach"), "an teach");
       });
 
       await test("Masculine initial vowel takes 't-'", () => {
-        const cases = [
-          "an t-íochtar",
-          "an t-uisce",
-          "an t-alt",
-          "an tAcht",
-          "an tUltach",
-        ];
-        for (const test of cases) {
-          const noun = (repository.getNounsByLemma(test.replace(/^an t-?/, "")))
-            .mapIfOk(x => x[0])
-            .unwrapOr(makeQuickNoun(test.replace(/^an t-?/, ""), "masc"));
-
-          assert.equal(NounPhrase.fromNoun(noun).forms.sgNomArt[0].value, test);
-        }
+        assert.equal(getSgNomArt("íochtar"), "an t-íochtar");
+        assert.equal(getSgNomArt("uisce"), "an t-uisce");
+        assert.equal(getSgNomArt("alt"), "an t-alt");
+        assert.equal(getSgNomArt(makeQuickNoun("Acht", "masc")), "an tAcht");
+        assert.equal(getSgNomArt(makeQuickNoun("Ultach", "masc")), "an tUltach");
       });
 
       await test("Feminine initial consonant", async () => {
         await test("lenition if applicable", () => {
-          const cases = [
-            ["fuinneog", "an fhuinneog"],
-            ["caibidil", "an chaibidil"]
-          ];
-          for (const test of cases) {
-            const noun = _nn(
-              repository.getNounsByLemma(test[0])
-                .mapIfOk(x => x[0])
-                .unwrapOr(null), `Noun not found: ${test[0]}`
-            );
-
-            const phrase = NounPhrase.fromNoun(noun);
-            assert.equal(phrase.forms.sgNomArt[0].value, test[1]);
-          }
+          assert.equal(getSgNomArt("fuinneog"), "an fhuinneog");
+          assert.equal(getSgNomArt("caibidil"), "an chaibidil");
         });
 
         await test("no change to d or t", () => {
-          const cases = [
-            ["deoch", "an deoch"],
-            ["teanga", "an teanga"]
-          ];
-          for (const test of cases) {
-            const noun = _nn(
-              repository.getNounsByLemma(test[0])
-                .mapIfOk(x => x[0])
-                .unwrapOr(null), `Noun not found: ${test[0]}`
-            );
-
-            const phrase = NounPhrase.fromNoun(noun);
-            assert.equal(phrase.forms.sgNomArt[0].value, test[1]);
-          }
+          assert.equal(getSgNomArt("deoch"), "an deoch");
+          assert.equal(getSgNomArt("teanga"), "an teanga");
         });
 
         await test("t precedes s where applicable", () => {
-          const cases = [
-            ["sráid", "an tsráid"],
-            ["Seapáin", "an tSeapáin"]
-          ];
-
-          for (const test of cases) {
-            const noun = _nn(
-              repository.getNounsByLemma(test[0])
-                .mapIfOk(x => x[0])
-                .unwrapOr(makeQuickNoun(test[0], "fem")), `Noun not found: ${test[0]}`
-            );
-
-            const phrase = NounPhrase.fromNoun(noun);
-            assert.equal(phrase.forms.sgNomArt[0].value, test[1]);
-          }
+          assert.equal(getSgNomArt("sráid"), "an tsráid");
+          assert.equal(getSgNomArt(makeQuickNoun("Seapáin", "fem")), "an tSeapáin");
         });
       });
 
       await test("Feminine initial vowel does not change", () => {
-        const cases = [
-          ["áit", "an áit"],
-          ["Astráil", "an Astráil"],
-          ["Iodáil", "an Iodáil"],
-          ["obair", "an obair"]
-        ];
-        for (const test of cases) {
-          const noun = _nn(
-            repository.getNounsByLemma(test[0])
-              .mapIfOk(x => x[0])
-              .unwrapOr(makeQuickNoun(test[0], "fem")), `Noun not found: ${test[0]}`
-          );
-
-          const phrase = NounPhrase.fromNoun(noun);
-          assert.equal(phrase.forms.sgNomArt[0].value, test[1]);
-        }
+        assert.equal(getSgNomArt("áit"), "an áit");
+        assert.equal(getSgNomArt(makeQuickNoun("Astráil", "fem")), "an Astráil");
+        assert.equal(getSgNomArt(makeQuickNoun("Iodáil", "fem")), "an Iodáil");
+        assert.equal(getSgNomArt("obair"), "an obair");
       });
     });
 
@@ -180,6 +126,76 @@ repository.initialize().then(async () => {
           // Lowercased
           ["um", "bille", "fada", "um an mbille fada"],
           ["um", "gníomhaireacht", "reachtúil", "um an ngníomhaireacht reachtúil"],
+        ];
+
+        for (const test of cases) {
+          const prep = _nn(
+            repository.getPrepositionsByLemma(test[0])
+              .mapIfOk(x => x[0])
+              .unwrapOr(null), `Preposition not found: ${test[0]}`
+          );
+
+          const noun = _nn(
+            repository.getNounsByLemma(test[1])
+              .mapIfOk(x => x[0])
+              .unwrapOr(null), `Noun not found: ${test[1]}`
+          );
+
+          assert.ok(noun.forms.sgDat.length > 0, "Noun has no dative singular form. Did you initialize the forms first?");
+
+          const adjective = _nn(
+            repository.getAdjectivesByLemma(test[2])
+              .mapIfOk(x => x[0])
+              .unwrapOr(null), `Adjective not found: ${test[2]}`
+          );
+
+          const nounPhrase = NounPhrase.fromModifiedNoun(noun, adjective);
+
+          const prepositionalPhrase = new PrepositionalPhrase(prep, nounPhrase);
+
+          const formResult = prepositionalPhrase.getForm("sgArtS");
+          if (!formResult.isOk) {
+            throw formResult.error;
+          }
+          const form = formResult.value[0];
+          assert.equal(form, test[3]);
+        }
+      });
+
+      await test("1.4.2: No change is done to masculine nouns starting with s in the dative case. A t precedes an s in feminine nouns (other than when the noun starts with sc-, sf-, sm-, sp-, st- or sv- which are left bare)", () => {
+        const cases = [
+          // Cliste not in db, changed to cliseach
+          ["ag", "Seapánach", "cliseach", "ag an Seapánach cliseach"],
+          ["ag", "seanmháthair", "bocht", "ag an tseanmháthair bhocht"],
+          ["ar", "suíochán", "fliuch", "ar an suíochán fliuch"],
+          ["ar", "sráid", "glan", "ar an tsráid ghlan"],
+          ["as", "sailéad", "blasta", "as an sailéad blasta"],
+          ["as", "saoire", "bliantúil", "as an tsaoire bhliantúil"],
+
+          ["chuig", "seanadóir", "cliseach", "chuig an seanadóir cliseach"],
+          ["chuig", "satailít", "mór", "chuig an tsatailít mhór"],
+          ["de", "saighdiúir", "sásúil", "den saighdiúir sásúil"],
+          ["de", "slándáil", "sóisialach", "den tslándáil shóisialach"],
+          ["do", "seanad", "nua", "don seanad nua"],
+          ["do", "saoirse", "ceart", "don tsaoirse cheart"],
+          // ["fairis", "saineolaí", "lách", "fairis an saineolaí lách"],
+          // ["fairis", "seanbhean", "saibhir", "fairis an tseanbhean shaibhir"],
+          ["faoi", "sonrasc", "déanach", "faoin sonrasc déanach"],
+          ["faoi", "slí", "díreach", "faoin tslí dhíreach"],
+          ["i", "soitheach", "gorm", "sa soitheach gorm"],
+          ["i", "seacláid", "milis", "sa tseacláid mhilis"],
+          ["le", "salann", "bán", "leis an salann bán"],
+          ["le", "slat", "fada", "leis an tslat fhada"],
+          ["ó", "suirbhé", "pearsanta", "ón suirbhé pearsanta"],
+          ["ó", "scoil", "beag", "ón scoil bheag"],
+          ["roimh", "samhradh", "fada", "roimh an samhradh fada"],
+          ["roimh", "seachtain", "mór", "roimh an tseachtain mhór"],
+          ["thar", "seol", "mór", "thar an seol mór"],
+          // ["thar", "Sionainn", "fada", "thar an tSionainn fhada", "fem"],
+          ["trí", "sorcas", "mór", "tríd an sorcas mór"],
+          ["trí", "seift", "cliseach", "tríd an tseift chliseach"],
+          ["um", "sainchomhairleoir", "cruinn", "um an sainchomhairleoir cruinn"],
+          ["um", "seirbhís", "maith", "um an tseirbhís mhaith"],
         ];
 
         for (const test of cases) {
