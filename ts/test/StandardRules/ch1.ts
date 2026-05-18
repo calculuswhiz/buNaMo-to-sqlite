@@ -138,11 +138,13 @@ repository.initialize().then(async () => {
       });
     });
 
+    // Standard appears to use the Southern form for the Core System
     await test("1.4 The Dative Singular Case — The Core System", async () => {
       await test("1.4.1: ...nouns starting with a consonant (other than d, t and s), lenition is applied to them following den, don, sa/san and eclipsis in every other context", () => {
         const cases = [
           // Prep, Noun, Modifier, Expected
-          ["ag", "fear", "maith", "ag an bhfear maith"]
+          ["ag", "fear", "maith", "ag an bhfear maith"],
+          ["ag", "cuideachta", "beag", "ag an gcuideachta bheag"]
         ];
 
         for (const test of cases) {
@@ -170,7 +172,6 @@ repository.initialize().then(async () => {
 
           const prepositionalPhrase = new PrepositionalPhrase(prep, nounPhrase);
 
-          // Standard appears to use the Southern form for the Core System
           const formResult = prepositionalPhrase.getForm("sgArtS");
           if (!formResult.isOk) {
             throw formResult.error;

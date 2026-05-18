@@ -75,8 +75,8 @@ export function mutate(mutation: Mutation, text: string): string {
       [/^(p)(.*)$/i, "b$1$2"],
       [/^(b)(.*)$/i, "m$1$2"],
       [/^(f)(.*)$/i, "bh$1$2"],
-      [/^(c)(.*)$/i, "gc$1$2"],
-      [/^(g)(.*)$/i, "ng$1$2"]
+      [/^(c)(.*)$/i, "g$1$2"],
+      [/^(g)(.*)$/i, "n$1$2"]
     ], text);
 
     if (commonEclipsis !== text)
@@ -84,8 +84,8 @@ export function mutate(mutation: Mutation, text: string): string {
 
     if (eclipsisVariant === "1") {
       return performReplacements([
-        [/^(t)(.*)$/i, "dt$1$2"],
-        [/^(d)(.*)$/i, "nd$1$2"],
+        [/^(t)(.*)$/i, "d$1$2"],
+        [/^(d)(.*)$/i, "n$1$2"],
         ...(
           mutation.endsWith("x")
             // x subvariant is consonants only
