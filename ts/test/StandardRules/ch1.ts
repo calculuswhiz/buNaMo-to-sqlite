@@ -144,7 +144,42 @@ repository.initialize().then(async () => {
         const cases = [
           // Prep, Noun, Modifier, Expected
           ["ag", "fear", "maith", "ag an bhfear maith"],
-          ["ag", "cuideachta", "beag", "ag an gcuideachta bheag"]
+          ["ag", "cuideachta", "beag", "ag an gcuideachta bheag"],
+          ["ar", "bosca", "dearg", "ar an mbosca dearg"],
+          ["ar", "bean", "saibhir", "ar an mbean shaibhir"],
+          ["as", "gleann", "mór", "as an ngleann mór"],
+          ["as", "páirc", "céanna", "as an bpáirc chéanna"],
+          // Lower cased the title. Not testing casing here.
+          ["chuig", "coimisinéir", "coinsiasach", "chuig an gcoimisinéir coinsiasach"],
+          ["chuig", "bean", "gairmiúil", "chuig an mbean ghairmiúil"],
+          ["de", "crann", "caol", "den chrann caol"],
+          ["de", "bean", "flaithiúil", "den bhean fhlaithiúil"],
+          ["do", "fear", "trom", "don fhear trom"],
+          ["do", "cuideachta", "gnóthach", "don chuideachta ghnóthach"],
+          // TODO Fara not found in database
+          // ["fairis", "garda", "béasach", "fairis an ngarda béasach"],
+          // ["fairis", "bean", "chairdiúil", "fairis an mbean chairdiúil"],
+          ["faoi", "fógra", "práinneach", "faoin bhfógra práinneach"],
+          ["faoi", "grian", "breá", "faoin ngrian bhreá"],
+          ["i", "bosca", "buí", "sa bhosca buí"],
+          ["i", "fraoch", "bán", "sa fhraoch bán"],
+          ["i", "féar", "fliuch", "san fhéar fliuch"],
+          ["i", "comhairle", "sóisialta", "sa chomhairle shóisialta"],
+          ["i", "frithréabhlóid", "fíochmhar", "sa fhrithréabhlóid fhíochmhar"],
+          ["i", "farraige", "glan", "san fharraige ghlan"],
+          ["le", "fasach", "cruinn", "leis an bhfasach cruinn"],
+          ["le", "báisteach", "trom", "leis an mbáisteach throm"],
+          ["ó", "caisleán", "fuar", "ón gcaisleán fuar"],
+          ["ó", "cathair", "mór", "ón gcathair mhór"],
+          ["roimh", "cruinniú", "tábhachtach", "roimh an gcruinniú tábhachtach"],
+          ["roimh", "bainis", "beag", "roimh an mbainis bheag"],
+          ["thar", "cnoc", "bán", "thar an gcnoc bán"],
+          ["thar", "farraige", "ciúin", "thar an bhfarraige chiúin"],
+          ["trí", "gairdín", "breá", "tríd an ngairdín breá"],
+          ["trí", "fuinneog", "gorm", "tríd an bhfuinneog ghorm"],
+          // Lowercased
+          ["um", "bille", "fada", "um an mbille fada"],
+          ["um", "gníomhaireacht", "reachtúil", "um an ngníomhaireacht reachtúil"],
         ];
 
         for (const test of cases) {
@@ -157,10 +192,10 @@ repository.initialize().then(async () => {
           const noun = _nn(
             repository.getNounsByLemma(test[1])
               .mapIfOk(x => x[0])
-              .unwrapOr(makeQuickNoun(test[1], "masc")), `Noun not found: ${test[1]}`
+              .unwrapOr(null), `Noun not found: ${test[1]}`
           );
 
-          assert.ok(noun.forms.sgDat.length > 0);
+          assert.ok(noun.forms.sgDat.length > 0, "Noun has no dative singular form. Did you initialize the forms first?");
 
           const adjective = _nn(
             repository.getAdjectivesByLemma(test[2])

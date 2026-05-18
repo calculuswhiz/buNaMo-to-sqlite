@@ -376,15 +376,15 @@ export class PrepositionalPhrase {
             return ok(this.nounPhrase.forms.sgDatArtN
               .map(form => {
                 const txt = mutate("len3", form.value);
-                return startsVowel(txt)
+                return startsVowelFhx(txt)
                   ? `san ${txt}`
                   : `sa ${txt}`;
               }));
           case "sgArtS":
             return ok(this.nounPhrase.forms.sgDatArtS
               .map(form => {
-                const txt = mutate(form.gender == "fem" ? "ecl3" : "ecl2", form.value);
-                return startsVowel(txt)
+                const txt = mutate(form.gender == "fem" ? "len3" : "len2", form.value);
+                return startsVowelFhx(txt)
                   ? `san ${txt}`
                   : `sa ${txt}`;
               }));
