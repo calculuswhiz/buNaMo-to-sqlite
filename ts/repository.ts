@@ -358,6 +358,8 @@ export class Repository {
 
     if (!rawAdjectivesResult.isOk)
       return err(rawAdjectivesResult.error);
+    else if (rawAdjectivesResult.value.length === 0)
+      return err(new Error(`No adjective found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(
       this.readers.getAdjectiveForms, uninitializedErrorMessage
@@ -472,6 +474,8 @@ export class Repository {
 
     if (!rawNounPhrasesResult.isOk)
       return err(rawNounPhrasesResult.error);
+    else if (rawNounPhrasesResult.value.length === 0)
+      return err(new Error(`No noun phrase found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(
       this.readers.getNounPhraseForms, uninitializedErrorMessage
@@ -526,6 +530,8 @@ export class Repository {
 
     if (!rawPossessivesResult.isOk)
       return err(rawPossessivesResult.error);
+    else if (rawPossessivesResult.value.length === 0)
+      return err(new Error(`No possessive found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(
       this.readers.getPossessiveForms, uninitializedErrorMessage
@@ -577,6 +583,8 @@ export class Repository {
 
     if (!rawPrepositionsResult.isOk)
       return err(rawPrepositionsResult.error);
+    else if (rawPrepositionsResult.value.length === 0)
+      return err(new Error(`No preposition found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(
       this.readers.getPrepositionForms, uninitializedErrorMessage
@@ -626,6 +634,8 @@ export class Repository {
 
     if (!foundVerbsResult.isOk)
       return err(foundVerbsResult.error);
+    else if (foundVerbsResult.value.length === 0)
+      return err(new Error(`No verb found with lemma "${lemma}"`));
 
     const formsQueryResult = _nnResult(
       this.readers.getVerbForms, uninitializedErrorMessage
