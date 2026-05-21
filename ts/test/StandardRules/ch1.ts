@@ -328,6 +328,171 @@ repository.initialize().then(async () => {
           assert.equal(getPrepositionalPhraseFormPl("trí", "gairdín"), "trí na gairdíní");
           assert.equal(getPrepositionalPhraseFormPl("um", "coill"), "um na coillte");
         });
+
+        await test("Initial vowel na + h prefix", () => {
+          // fásta changed to fastaímeach
+          assert.equal(getPrepositionalPhraseFormPl("ag", "iníon", "fastaímeach"), "ag na hiníonacha fastaímeacha");
+          assert.equal(getPrepositionalPhraseFormPl("ar", "oileán", "gaofar"), "ar na hoileáin ghaofara");
+          assert.equal(getPrepositionalPhraseFormPl("as", "iris", "acadúil"), "as na hirisí acadúla");
+          assert.equal(getPrepositionalPhraseFormPl("chuig", "oifigeach", "deas"), "chuig na hoifigigh dheasa");
+          assert.equal(getPrepositionalPhraseFormPl("de", "uimhir"), "de na huimhreacha");
+          assert.equal(getPrepositionalPhraseFormPl("do", "obair"), "do na hoibreacha");
+          assert.equal(getPrepositionalPhraseFormPl("faoi", "eachtra"), "faoi na heachtraí");
+          // assert.equal(getPrepositionalPhraseFormPl("fara", "ógmhná"), "fairis na hógmhná");
+          assert.equal(getPrepositionalPhraseFormPl("le", "eochair"), "leis na heochracha");
+          assert.equal(getPrepositionalPhraseFormPl("ó", "Éireannach"), "ó na hÉireannaigh");
+          assert.equal(getPrepositionalPhraseFormPl("roimh", "éan"), "roimh na héin");
+          assert.equal(getPrepositionalPhraseFormPl("i", "eitleán"), "sna heitleáin");
+          assert.equal(getPrepositionalPhraseFormPl("thar", "áit"), "thar na háiteanna");
+          assert.equal(getPrepositionalPhraseFormPl("trí", "aistriúchán"), "trí na haistriúcháin");
+          assert.equal(getPrepositionalPhraseFormPl("um", "acht"), "um na hachtanna");
+        });
+      });
+
+      await test("1.6.3 The Genitive Plural Case", async () => {
+        const getPlGenArt = (lemma: string | Noun, modifierLemma: string | null = null, backup: Noun | null = null) => {
+          const noun = typeof lemma === "string"
+            ? getNoun(lemma, backup)
+            : lemma;
+
+          return modifierLemma != null
+            ? NounPhrase.fromModifiedNoun(noun, getAdjective(modifierLemma)).forms.plGenArt[0].value
+            : NounPhrase.fromNoun(noun).forms.plGenArt[0].value;
+        };
+
+        await test("Starts with eclipsable consonants - na + eclipsis", () => {
+          assert.equal(getPlGenArt("cnoc"), "na gcnoc");
+          assert.equal(getPlGenArt("fuinneog"), "na bhfuinneog");
+          assert.equal(getPlGenArt("duine"), "na ndaoine");
+        });
+
+        await test("Starts with vowel - na + eclipsis", () => {
+          assert.equal(getPlGenArt("áit"), "na n-áiteanna");
+          assert.equal(getPlGenArt("obair"), "na n-oibreacha");
+          assert.equal(getPlGenArt("Albanach"), "na nAlbanach");
+        });
+      });
+    });
+
+    await test("1.7 The Dative Singular Case — The Lenition System", async () => {
+      // Same as the other one, but using sgArtN (corresponds to Lenition System)
+      const getPrepositionalPhraseFormSg = (prepLemma: string, nounLemma: string | [string, Gender], adjLemma: string) => {
+        const prep = getPreposition(prepLemma);
+        const noun = Array.isArray(nounLemma) ? makeQuickNoun(nounLemma[0], nounLemma[1]) : getNoun(nounLemma);
+        const adj = getAdjective(adjLemma);
+        const nounPhrase = NounPhrase.fromModifiedNoun(noun, adj);
+        const prepositionalPhrase = new PrepositionalPhrase(prep, nounPhrase);
+        const formResult = prepositionalPhrase.getForm("sgArtN");
+        if (!formResult.isOk) {
+          throw new Error(`Form not found for: ${prepLemma} ${nounLemma} ${adjLemma}`);
+        }
+        return formResult.value[0];
+      };
+
+      await test("1.7.3 In the Lenition system, nouns starting with the a consonant are lenited (other than d, t and s) as well as the adjectives attached to them.", () => {
+        assert.equal(getPrepositionalPhraseFormSg("ag", "fear", "maith"), "ag an fhear mhaith");
+        assert.equal(getPrepositionalPhraseFormSg("ag", "cuideachta", "beag"), "ag an chuideachta bheag");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "bosca", "dearg"), "ar an bhosca dhearg");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "bean", "saibhir"), "ar an bhean shaibhir");
+        assert.equal(getPrepositionalPhraseFormSg("as", "gleann", "mór"), "as an ghleann mhór");
+        assert.equal(getPrepositionalPhraseFormSg("as", "páirc", "céanna"), "as an pháirc chéanna");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", "coimisinéir", "coinsiasach"), "chuig an choimisinéir choinsiasach");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", "bean", "gairmiúil"), "chuig an bhean ghairmiúil");
+        assert.equal(getPrepositionalPhraseFormSg("de", "crann", "caol"), "den chrann chaol");
+        assert.equal(getPrepositionalPhraseFormSg("de", "bean", "flaithiúil"), "den bhean fhlaithiúil");
+        assert.equal(getPrepositionalPhraseFormSg("do", "fear", "trom"), "don fhear throm");
+        assert.equal(getPrepositionalPhraseFormSg("do", "cuideachta", "gnóthach"), "don chuideachta ghnóthach");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "garda", "béasach"), "fairis an gharda bhéasach");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "bean", "cairdiúil"), "fairis an bhean chairdiúil");
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "fógra", "práinneach"), "faoin fhógra phráinneach");
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "grian", "breá"), "faoin ghrian bhreá");
+        assert.equal(getPrepositionalPhraseFormSg("i", "bosca", "buí"), "sa bhosca bhuí");
+        assert.equal(getPrepositionalPhraseFormSg("i", "fraoch", "bán"), "sa fhraoch bhán");
+        assert.equal(getPrepositionalPhraseFormSg("i", "féar", "fliuch"), "san fhéar fhliuch");
+        assert.equal(getPrepositionalPhraseFormSg("i", "comhairle", "sóisialta"), "sa chomhairle shóisialta");
+        assert.equal(getPrepositionalPhraseFormSg("i", "frithréabhlóid", "fíochmhar"), "sa fhrithréabhlóid fhíochmhar");
+        assert.equal(getPrepositionalPhraseFormSg("i", "farraige", "glan"), "san fharraige ghlan");
+        assert.equal(getPrepositionalPhraseFormSg("le", "fasach", "cruinn"), "leis an fhasach chruinn");
+        assert.equal(getPrepositionalPhraseFormSg("le", "báisteach", "trom"), "leis an bháisteach throm");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "caisleán", "fuar"), "ón chaisleán fhuar");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "cathair", "mór"), "ón chathair mhór");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "cruinniú", "tábhachtach"), "roimh an chruinniú thábhachtach");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "bainis", "beag"), "roimh an bhainis bheag");
+        assert.equal(getPrepositionalPhraseFormSg("thar", "cnoc", "bán"), "thar an chnoc bhán");
+        assert.equal(getPrepositionalPhraseFormSg("thar", "farraige", "ciúin"), "thar an fharraige chiúin");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "gairdín", "breá"), "tríd an ghairdín bhreá");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "fuinneog", "gorm"), "tríd an fhuinneog ghorm");
+        assert.equal(getPrepositionalPhraseFormSg("um", "bille", "fada"), "um an bhille fhada");
+        assert.equal(getPrepositionalPhraseFormSg("um", "gníomhaireacht", "reachtúil"), "um an ghníomhaireacht reachtúil");
+      });
+
+      await test("1.7.4: As for masculine nouns and feminine nouns starting with s, a t is placed before the s (other than with nouns starting with sc-, sf-, sm-, sp-, st- or sv- which are left bare)", () => {
+        assert.equal(getPrepositionalPhraseFormSg("ag", "Seapánach", "cliste"), "ag an tSeapánach chliste");
+        assert.equal(getPrepositionalPhraseFormSg("ag", "seanmháthair", "bocht"), "ag an tseanmháthair bhocht");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "suíochán", "fliuch"), "ar an tsuíochán fhliuch");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "sráid", "glan"), "ar an tsráid ghlan");
+        assert.equal(getPrepositionalPhraseFormSg("as", "sailéad", "blasta"), "as an tsailéad bhlasta");
+        assert.equal(getPrepositionalPhraseFormSg("as", "saoire", "bliantúil"), "as an tsaoire bhliantúil");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", "seanadóir", "nuacheaptha"), "chuig an tseanadóir nuacheaptha");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", "satailít", "mór"), "chuig an tsatailít mhór");
+        assert.equal(getPrepositionalPhraseFormSg("de", "saighdiúir", "sásúil"), "den tsaighdiúir shásúil");
+        assert.equal(getPrepositionalPhraseFormSg("de", "slándáil", "sóisialach"), "den tslándáil shóisialach");
+        assert.equal(getPrepositionalPhraseFormSg("do", "seanadóir", "nua"), "don tseanadóir nua");
+        assert.equal(getPrepositionalPhraseFormSg("do", "saoirse", "ceart"), "don tsaoirse cheart");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "saineolaí", "lách"), "fairis an tsaineolaí lách");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "seanbhean", "saibhir"), "fairis an tseanbhean shaibhir");
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "sonrasc", "déanach"), "faoin tsonrasc dhéanach");
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "slí", "díreach"), "faoin tslí dhíreach");
+        assert.equal(getPrepositionalPhraseFormSg("i", "soitheach", "gorm"), "sa tsoitheach ghorm");
+        assert.equal(getPrepositionalPhraseFormSg("i", "seacláid", "milis"), "sa tseacláid mhilis");
+        assert.equal(getPrepositionalPhraseFormSg("le", "salann", "bán"), "leis an tsalann bhán");
+        assert.equal(getPrepositionalPhraseFormSg("le", "slat", "fada"), "leis an tslat fhada");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "suirbhé", "pearsanta"), "ón tsuirbhé phearsanta");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "scoil", "beag"), "ón scoil bheag");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "samhradh", "fada"), "roimh an tsamhradh fhada");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "seachtain", "mór"), "roimh an tseachtain mhór");
+        assert.equal(getPrepositionalPhraseFormSg("thar", "seol", "mór"), "thar an tseol mhór");
+        assert.equal(getPrepositionalPhraseFormSg("thar", ["Sionainn", "fem"], "fada"), "thar an tSionainn fhada");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "sorcas", "mór"), "tríd an tsorcas mhór");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "seift", "cliste"), "tríd an tseift chliste");
+        assert.equal(getPrepositionalPhraseFormSg("um", "sainchomhairleoir", "cruinn"), "um an tsainchomhairleoir chruinn");
+        assert.equal(getPrepositionalPhraseFormSg("um", "seirbhís", "maith"), "um an tseirbhís mhaith");
+      });
+
+      await test("1.7.5: No change is done to either masculine nouns or feminine nouns starting with vowels.", () => {
+        assert.equal(getPrepositionalPhraseFormSg("ag", "Albanach", "ciallmhar"), "ag an Albanach chiallmhar");
+        assert.equal(getPrepositionalPhraseFormSg("ag", "aeráid", "gaofar"), "ag an aeráid ghaofar");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "eitleán", "dubh"), "ar an eitleán dhubh");
+        assert.equal(getPrepositionalPhraseFormSg("ar", "olann", "bán"), "ar an olann bhán");
+        assert.equal(getPrepositionalPhraseFormSg("as", "uisce", "glan"), "as an uisce ghlan");
+        assert.equal(getPrepositionalPhraseFormSg("as", "iris", "cáiliúil"), "as an iris cháiliúil");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", ["Aire", "masc"], "ilteangach"), "chuig an Aire ilteangach");
+        assert.equal(getPrepositionalPhraseFormSg("chuig", ["Ostair", "fem"], "sléibhtiúil"), "chuig an Ostair shléibhtiúil");
+        assert.equal(getPrepositionalPhraseFormSg("de", "alt", "fada"), "den alt fhada");
+        assert.equal(getPrepositionalPhraseFormSg("de", "uimhir", "cruinn"), "den uimhir chruinn");
+        assert.equal(getPrepositionalPhraseFormSg("do", "údarás", "céanna"), "don údarás chéanna");
+        assert.equal(getPrepositionalPhraseFormSg("do", "obair", "crua"), "don obair chrua");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "oifigeach", "múinte"), "fairis an oifigeach mhúinte");
+        // assert.equal(getPrepositionalPhraseFormSg("fara", "ógbhean", "cliste"), "fairis an ógbhean chliste");
+      });
+
+      await test("1.7.6: No change is done to either masculine nouns or feminine nouns starting with d and t.", () => {
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "dréimire", "briste"), "faoin dréimire bhriste");
+        assert.equal(getPrepositionalPhraseFormSg("faoi", "deacracht", "breise"), "faoin deacracht bhreise");
+        assert.equal(getPrepositionalPhraseFormSg("i", "teas", "mór"), "sa teas mhór");
+        assert.equal(getPrepositionalPhraseFormSg("i", "deoch", "fuar"), "sa deoch fhuar");
+        assert.equal(getPrepositionalPhraseFormSg("le", "duine", "ciúin"), "leis an duine chiúin");
+        assert.equal(getPrepositionalPhraseFormSg("le", "taithí", "maith"), "leis an taithí mhaith");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "deartháir", "cineálta"), "ón deartháir chineálta");
+        assert.equal(getPrepositionalPhraseFormSg("ó", "teanga", "líofa"), "ón teanga líofa");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "tarbh", "fiáin"), "roimh an tarbh fhiáin");
+        assert.equal(getPrepositionalPhraseFormSg("roimh", "deighilt", "mór"), "roimh an deighilt mhór");
+        assert.equal(getPrepositionalPhraseFormSg("thar", "teach", "gorm"), "thar an teach ghorm");
+        assert.equal(getPrepositionalPhraseFormSg("thar", "diallait", "nua"), "thar an diallait nua");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "talamh", "crua"), "tríd an talamh chrua");
+        assert.equal(getPrepositionalPhraseFormSg("trí", "drochaimsir", "gránna"), "tríd an drochaimsir ghránna");
+        assert.equal(getPrepositionalPhraseFormSg("um", "dlí", "coiriúil"), "um an dlí choiriúil");
+        assert.equal(getPrepositionalPhraseFormSg("um", "tagairt", "cuí"), "um an tagairt chuí");
       });
     });
   });
