@@ -221,10 +221,7 @@ export function palatalize(base: string, target?: string): string {
   if (target === undefined) {
     const numSyllables = countSyllables(base);
     if (numSyllables === 1
-      || (
-        !base.endsWith("ach")
-        && !base.endsWith("each")
-        && !base.endsWith("ioch"))
+      || !/(?:ach|each|íoch)$/.test(base)
     ) {
       // Monosyllabic words have some irregular palatalization patterns that we can just hard-code here:
       const palatalized = performReplacements(palatalizationReplaceTable, base);
@@ -235,9 +232,10 @@ export function palatalize(base: string, target?: string): string {
         return base.replace(slenderizePattern, "$1i$2");
       }
     } else {
-      // Rule accounts for -ach -> -aigh, -each -> -igh, -ioch -> -igh in polysyllabic nouns (2.1.4.d)
+      // Rule accounts for -ach -> -aigh, -each -> -igh, -íoch -> -ígh in polysyllabic nouns (2.1.4.d)
       return base
-        .replace(/(?:each|ioch)$/, "igh")
+        .replace(/each$/, "igh")
+        .replace(/íoch$/, "ígh")
         .replace(/ach$/, "aigh");
     }
   } else if (!endsWithSlenderVowelPattern.test(target)) {
