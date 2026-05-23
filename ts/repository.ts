@@ -97,8 +97,6 @@ export class Repository {
 
   // #region Insertion API. Always returns ID of the inserted row
 
-  // TODO Use Result type instead of _nn.
-
   insertNoun(
     declension: number,
     isProper: boolean,

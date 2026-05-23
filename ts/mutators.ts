@@ -174,7 +174,19 @@ export const Vowels = "aeiouáéíóú";
 export const VowelsBroad = "aouáóú";
 export const VowelsSlender = "eiéí";
 
-const palatalizationReplaceTable = [
+// Very basic syllable pattern for now
+const syllablePattern = new RegExp(
+  `[${Consonants}]*[${Vowels}]+[${Consonants}]*(?=[${Consonants}]*[${Vowels}]|$)`,
+  "gi"
+);
+
+/** Count syllables in a given word */
+export function countSyllables(text: string): number {
+  const matches = text.match(syllablePattern);
+  return matches != null ? matches.length : 1;
+}
+
+export const palatalizationReplaceTable = [
   ["ea", "i"],
   ["éa", "éi"],
   ["ia", "éi"],
@@ -193,43 +205,59 @@ const irregularSlenderizePattern = new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])
 
 /**
  * If target is not provided:
- *   Performs regular slenderization (attenuation, palatalization): 
+ *   Performs regular palatalization (attenuation): 
  *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
  *    ends in a broad vowel, then it changes this vowel cluster such that it ends in a slender vowel now.
  *   @note A base that's already slender passes through unchanged.
  * 
  * Otherwise:
- *   Performs irregular slenderization (attenuation, palatalization): 
+ *   Performs irregular palatalization (attenuation): 
  *    if the base ends in a consonant, and if the vowel cluster immediately before this consonant
  *    ends in a broad vowel, then it changes this vowel cluster into the target (the second argument).
- *   @note If the target does not end in a slender vowel, then regular slenderization is attempted instead.
+ *   @note If the target does not end in a slender vowel, then regular palatalization is attempted instead.
  *   @note A base that's already attenuated passes through unchanged.
  */
-export function slenderize(base: string, target?: string): string {
+export function palatalize(base: string, target?: string): string {
   if (target === undefined) {
-    const slenderized = performReplacements(palatalizationReplaceTable, base);
-    if (slenderized !== base)
-      return slenderized;
-    else {
-      // The generic case: insert "i" at the end of the vowel cluster:
-      return base.replace(slenderizePattern, "$1i$2");
+    const numSyllables = countSyllables(base);
+    if (numSyllables === 1
+      || (
+        !base.endsWith("ach")
+        && !base.endsWith("each")
+        && !base.endsWith("ioch"))
+    ) {
+      // Monosyllabic words have some irregular palatalization patterns that we can just hard-code here:
+      const palatalized = performReplacements(palatalizationReplaceTable, base);
+      if (palatalized !== base)
+        return palatalized;
+      else {
+        // The generic case: insert "i" at the end of the vowel cluster:
+        return base.replace(slenderizePattern, "$1i$2");
+      }
+    } else {
+      // Rule accounts for -ach -> -aigh, -each -> -igh, -ioch -> -igh in polysyllabic nouns (2.1.4.d)
+      return base
+        .replace(/(?:each|ioch)$/, "igh")
+        .replace(/ach$/, "aigh");
     }
   } else if (!endsWithSlenderVowelPattern.test(target)) {
-    // Attempt regular slenderization instead
-    return slenderize(base);
+    // Attempt regular palatalization instead
+    return palatalize(base);
   } else {
     // Broad vowel maintained.
     return base.replace(irregularSlenderizePattern, `$1${target}$2`);
   }
 }
 
-const broadenReplaceTable = [
+export const broadenReplaceTable = [
   ["ói", "ó"],
   ["ei", "ea"],
   ["éi", "éa"],
   ["i", "ea"],
   ["aí", "aío"],
   ["í", "ío"],
+  // Not in Gramadan, mentioned in Ch2 of Standard
+  ["oi", "o"],
   ["ui", "o"],
   ["io", "ea"],
 ].map(([source, target]) => ([

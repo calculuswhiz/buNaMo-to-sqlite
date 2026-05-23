@@ -1,5 +1,5 @@
 import type { Gender, GrammaticalCase } from "../features";
-import { broaden, slenderize, syncope, VowelsBroad, VowelsSlender } from "../mutators";
+import { broaden, palatalize, syncope, VowelsBroad, VowelsSlender } from "../mutators";
 
 /** O: all cases are identical. */
 export function getSingularInfoO(lemma: string): string[] {
@@ -12,7 +12,7 @@ export function getSingularInfoC(lemma: string, gender: Gender, gramCase: Gramma
     return [lemma];
   else {
     // e.g. bacach > bacaigh
-    const slenderizedGh = slenderize(lemma.replace(/ch$/, "gh"), slenderizationTarget);
+    const slenderizedGh = palatalize(lemma.replace(/ch$/, "gh"), slenderizationTarget);
     if (gramCase === "Vocative") {
       if (gender === "fem")
         return [lemma];
@@ -49,7 +49,7 @@ export function getSingularInfoE(
     return [lemma];
   else {
     const syncopateChecked = shouldSyncopate ? syncope(lemma) : lemma;
-    const slenderized = slenderize(syncopateChecked, slenderizationTarget);
+    const slenderized = palatalize(syncopateChecked, slenderizationTarget);
 
     if (gramCase === "Dative") {
       return [lemma, slenderized];
@@ -125,7 +125,7 @@ export function getSingularInfoEAX(lemma: string, gramCase: GrammaticalCase, sho
     return [lemma];
   else {
     const syncopateChecked = shouldSyncopate ? syncope(lemma) : lemma;
-    const slenderized = slenderize(syncopateChecked, slenderizationTarget);
+    const slenderized = palatalize(syncopateChecked, slenderizationTarget);
 
     return [`${slenderized}each`];
   }

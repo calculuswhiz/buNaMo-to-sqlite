@@ -1,5 +1,5 @@
 import type { GrammaticalCase } from "../features";
-import { broaden, slenderize } from "../mutators";
+import { broaden, palatalize } from "../mutators";
 
 /** Operations not defined for the Dative case */
 type ValidGramCases = Exclude<GrammaticalCase, "Dative">;
@@ -14,7 +14,7 @@ export function pluralizeLgC(base: string, gramCase: ValidGramCases, slenderizat
   }
   else {
     return [
-      slenderize(
+      palatalize(
         base
           //eg. bacach > bacaigh
           .replace(/ch$/, "gh"),
@@ -29,7 +29,7 @@ export function pluralizeLgE(base: string, gramCase: ValidGramCases, slenderizat
   if (gramCase === "Genitive")
     return [broaden(base)];
   else
-    return [`${slenderize(base, slenderizationTarget)}e`];
+    return [`${palatalize(base, slenderizationTarget)}e`];
 }
 
 /** Plural class LgA: weak, plural formed by suffix "-a". */
