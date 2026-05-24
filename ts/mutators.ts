@@ -170,9 +170,9 @@ export function startsBilabial(txt: string): boolean {
 
 // Character types, for convenience when writing regular expressions:
 export const Consonants = "bcdfghjklmnpqrstvwxz";
-export const Vowels = "aeiouáéíóú";
 export const VowelsBroad = "aouáóú";
 export const VowelsSlender = "eiéí";
+export const Vowels = `${VowelsBroad}${VowelsSlender}`;
 
 // Very basic syllable pattern for now
 const syllablePattern = new RegExp(
@@ -186,6 +186,7 @@ export function countSyllables(text: string): number {
   return matches != null ? matches.length : 1;
 }
 
+// Covers basic cases where vowels follow consonants
 export const palatalizationReplaceTable = [
   ["ea", "i"],
   ["éa", "éi"],
@@ -201,6 +202,7 @@ export const palatalizationReplaceTable = [
 
 const slenderizePattern = new RegExp(`^(.*[${VowelsBroad}])([${Consonants}]+)$`);
 const endsWithSlenderVowelPattern = new RegExp(`[${VowelsSlender}]$`);
+const tripleVowelPattern = new RegExp(`^(.*[${VowelsBroad}]í)[${VowelsBroad}]([${Consonants}]+)$`);
 const irregularSlenderizePattern = new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Consonants}]+)$`);
 
 /**
@@ -224,7 +226,10 @@ export function palatalize(base: string, target?: string): string {
       || !/(?:ach|each|íoch)$/.test(base)
     ) {
       // Monosyllabic words have some irregular palatalization patterns that we can just hard-code here:
-      const palatalized = performReplacements(palatalizationReplaceTable, base);
+      const palatalized = performReplacements(palatalizationReplaceTable, base)
+        // This rule covers cases claíomh -> claímh, comhshuíomh -> comhshúimh
+        // TODO This is experimental. Don't know if it conflicts with other parts of speech/declensions yet
+        .replace(tripleVowelPattern, "$1$2");
       if (palatalized !== base)
         return palatalized;
       else {

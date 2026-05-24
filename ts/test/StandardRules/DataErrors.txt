@@ -1,0 +1,23 @@
+These are 2nd declension nouns as in the db. There are masculine versions of these, however:
+ID 3001: nominative = "bearach" => expected = "bearaigh", actual = "bearaí"
+ID 21168: nominative = "ochtach" => expected = "ochtaigh", actual = "ochtaí"
+
+These are compounds formed with -teach, so they should not be in any declension
+ID 7911: nominative = "craobhtheach" => expected = "craobhthigh", actual = "craobhthí"
+ID 9946: nominative = "díonteach" => expected = "díontigh", actual = "díontí"
+
+These are 3rd declension. FGB is also wrong(?)
+ID 17361: nominative = "leann" => expected = "linn", actual = "leanna"
+
+This is based on a vn. ending in -(e)adh, which does not fit a declension rule
+ID 1113: nominative = "ainchleachtadh" => expected = "ainchleachtaidh", actual = "ainchleachta"
+ID 3670: nominative = "bonnbhualadh" => expected = "bonnbhualaidh", actual = "bonnbhuailte"
+ID 9974: nominative = "díraonadh" => expected = "díraonaidh", actual = "díraonta"
+ID 26516: nominative = "slogadh" => expected = "slogaidh", actual = "slogtha"
+
+There is a first declension noun, but the one given is the vn form.
+ID 13580: nominative = "fuineadh" => expected = "fuinidh", actual = "fuinte"
+
+Not sure why this is 1st declension in all dictionaries I've seen.
+ID 5306: nominative = "catacóm" => expected = "catacóim", actual = "catacóma"
+

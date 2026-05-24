@@ -5,7 +5,7 @@
 import path from "node:path";
 import { getExistingDb, Repository } from "../../repository";
 import test from "node:test";
-import { palatalizationReplaceTable, palatalize } from "../../mutators";
+import { countSyllables, palatalizationReplaceTable, palatalize } from "../../mutators";
 
 const db = getExistingDb(path.join(__dirname, "../../../output/buNaMo.sqlite"));
 const repository = new Repository(db);
@@ -20,7 +20,8 @@ repository.initialize().then(async () => {
       //   e.g., breac, bric; cuireadh, cuiridh; leiceann, leicinn; 
       //   other than with certain monosyllabic nouns, e.g., each, eich.
       const irregularPalatalizationNouns = new Set([
-        "brian", "cliant", "fiar", "giar", "rian", "srian", "trian"
+        "brian", "cliant", "fiar", "giar", "rian", "srian", "trian",
+        "beibhealghiar", "péistghiar"
       ]);
 
       function checkGenitiveSingular1stDeclension(nominative: string, genitive: string): [boolean, string] {
@@ -38,7 +39,18 @@ repository.initialize().then(async () => {
           const expectedGenitiveSingularForm = palatalize(nominative)
             // ea to i
             .replace(palatalizationReplaceTable[0][0], palatalizationReplaceTable[0][1]);
-          return [genitive === expectedGenitiveSingularForm, expectedGenitiveSingularForm];
+
+          const isExpected = genitive === expectedGenitiveSingularForm
+            // The -gh changes apply to certain monosyllabic nouns as well, but the Standard does not 
+            // enumerate all of them, so we can't test those definitely for now.
+            || (countSyllables(nominative) === 1
+              && nominative
+                .replace(/each$/, "igh")
+                .replace(/íoch$/, "ígh")
+                .replace(/ach$/, "aigh") === genitive)
+            // g(h)laoch, fraoch, naoch
+            || nominative.replace(/aoch/, "aoigh") === genitive;
+          return [isExpected, expectedGenitiveSingularForm];
         }
       }
 
