@@ -114,6 +114,7 @@ test("Test mutators", async () => {
     assert.strictEqual(palatalize("fionn"), "finn");
     assert.strictEqual(palatalize("aer"), "aeir");
     assert.strictEqual(palatalize("claíomh"), "claímh");
+    assert.strictEqual(palatalize("cearnóg"), "cearnóig");
   });
 
   await test("Slenderize irregular", () => {

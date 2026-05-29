@@ -202,7 +202,6 @@ export const palatalizationReplaceTable = [
 
 const slenderizePattern = new RegExp(`^(.*[${VowelsBroad}])([${Consonants}]+)$`);
 const endsWithSlenderVowelPattern = new RegExp(`[${VowelsSlender}]$`);
-const tripleVowelPattern = new RegExp(`^(.*[${VowelsBroad}]í)[${VowelsBroad}]([${Consonants}]+)$`);
 const irregularSlenderizePattern = new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])([${Consonants}]+)$`);
 
 /**
@@ -219,34 +218,20 @@ const irregularSlenderizePattern = new RegExp(`^(.*[${Vowels}]*[${VowelsBroad}])
  *   @note If the target does not end in a slender vowel, then regular palatalization is attempted instead.
  *   @note A base that's already attenuated passes through unchanged.
  */
-export function palatalize(base: string, target?: string): string {
+export function palatalize(
+  base: string,
+  target?: string,
+  /** Allows specifying alternative palatalization rules 
+   * (e.g. 2nd declension genSg nouns) */
+  alternativeReplaceTable?: [RegExp, string][]
+): string {
   if (target === undefined) {
-    const numSyllables = countSyllables(base);
-    if (numSyllables === 1
-      || !/(?:ach|each|íoch)$/.test(base)
-    ) {
-      // Monosyllabic words have some irregular palatalization patterns that we can just hard-code here:
-      const palatalized = performReplacements(palatalizationReplaceTable, base)
-        // This rule covers cases claíomh -> claímh, comhshuíomh -> comhshúimh
-        // TODO This is experimental. Don't know if it conflicts with other parts of speech/declensions yet
-        .replace(tripleVowelPattern, "$1$2")
-        // Standard does not mention -éigh, but it seems to follow based on data.
-        // Using -éi- since the changes have already been applied.
-        .replace(/éich$/, "éigh");
-      if (palatalized !== base)
-        return palatalized;
-      else {
-        // The generic case: insert "i" at the end of the vowel cluster:
-        return base.replace(slenderizePattern, "$1i$2");
-      }
-    } else {
-      // Rule accounts for -ach -> -aigh, -each -> -igh, -íoch -> -ígh in polysyllabic nouns (2.1.4.d)
-      return base
-        .replace(/each$/, "igh")
-        .replace(/íoch$/, "ígh")
-        .replace(/ach$/, "aigh")
-        // Standard does not mention -éigh, but it seems to follow based on data.
-        .replace(/éaigh$/, "éigh");
+    const palatalized = performReplacements(alternativeReplaceTable ?? palatalizationReplaceTable, base);
+    if (palatalized !== base)
+      return palatalized;
+    else {
+      // The generic case: insert "i" at the end of the vowel cluster:
+      return base.replace(slenderizePattern, "$1i$2");
     }
   } else if (!endsWithSlenderVowelPattern.test(target)) {
     // Attempt regular palatalization instead
@@ -325,6 +310,8 @@ export function unduplicate(base: string): string {
   return base.replace(unduplicationPattern, "$1");
 }
 
+/** 2.1.6 - When a short, unaccented vowel or vowels are dropped 
+ * from the word when it is inflected, this is syncopation */
 const syncopePattern = new RegExp(`^(.*[${Consonants}])[${Vowels}]+([${Consonants}]+)$`);
 /**
  * Performs syncope by removing the final vowel cluster,
