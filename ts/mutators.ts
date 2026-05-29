@@ -229,7 +229,10 @@ export function palatalize(base: string, target?: string): string {
       const palatalized = performReplacements(palatalizationReplaceTable, base)
         // This rule covers cases claíomh -> claímh, comhshuíomh -> comhshúimh
         // TODO This is experimental. Don't know if it conflicts with other parts of speech/declensions yet
-        .replace(tripleVowelPattern, "$1$2");
+        .replace(tripleVowelPattern, "$1$2")
+        // Standard does not mention -éigh, but it seems to follow based on data.
+        // Using -éi- since the changes have already been applied.
+        .replace(/éich$/, "éigh");
       if (palatalized !== base)
         return palatalized;
       else {
@@ -241,7 +244,9 @@ export function palatalize(base: string, target?: string): string {
       return base
         .replace(/each$/, "igh")
         .replace(/íoch$/, "ígh")
-        .replace(/ach$/, "aigh");
+        .replace(/ach$/, "aigh")
+        // Standard does not mention -éigh, but it seems to follow based on data.
+        .replace(/éaigh$/, "éigh");
     }
   } else if (!endsWithSlenderVowelPattern.test(target)) {
     // Attempt regular palatalization instead
