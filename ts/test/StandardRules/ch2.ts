@@ -145,6 +145,7 @@ repository.initialize().then(async () => {
     // Nouns in this declension end with a consonant, broad or slender, in the nominative singular. 
     // They are all feminine other than im and sliabh. 
     await test("2.3.2 The Genitive Singular", async () => {
+      // The overview just says the genSg has +e or -(a)í. Some specifics given in 2.3.2:
       // a. An -e is put with the nominative singular and if it ends with a 
       //  broad consonant, it is palatalized, e.g., bróg, bróige; coill, coille; earr, eirre; 
       //  except with polysyllabic nouns ending with -(e)ach. 
@@ -157,9 +158,13 @@ repository.initialize().then(async () => {
       //    e.g., bruinneall, bruinnille; ficheall, fichille); and 
       //   ii. -ia- to -i- in the word scian, scine.
 
-      // Rules not mentioned by the Standard:
-      // 1. If the noun ends in a slender consonant (single consonant only),
-      //   the slender vowels are syncopated.
+      // However, these don't seem to be exhaustive, especially with syncope:
+      // coinneal -> coinnle. Syncope of ea. That and other compounds
+      // obair -> oibre. Palatalization of o and sycope of ai. That and other compounds
+      // cadhain -> caidhne. Palatalization + syncope
+      // boireann -> boirne. Syncope
+
+      // TODO The Standard rules just are not clear enough. More research is needed.
 
       function checkGenitiveSingular2ndDeclension(
         nominative: string, genitive: string
@@ -176,13 +181,15 @@ repository.initialize().then(async () => {
         if (!syncopeRule) {
           const modifiedReplaceTable = [...palatalizationReplaceTable];
           // c.i.
-          if (isPolysyllabic)
-            // TODO c.i is unclear. The example it gives is clearly 1 syllable, but
+          if (isPolysyllabic) {
+            // TODO c.i is unclear: ea -> ei. 
+            // The example it gives is clearly 1 syllable, but
             // then says that ea is changed to i in monosyllabic nouns.
             modifiedReplaceTable[0] = [
               new RegExp(`^(.*[${Consonants}])?ea([${Consonants}]+)$`),
               "$1ei$2"
             ];
+          }
 
           const expectedGenitiveSingularForm = isPolysyllabic
             && /(?:e?ach)$/.test(nominative)

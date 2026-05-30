@@ -68,3 +68,7 @@ It also contains the queries used to build the database, which are organized by 
 ## Affiliation
 
 I am not in any way affiliated with **Foras na Gaeilge**, the copyright holders of the data.
+
+### Testing notes
+- Noteworthy things are documented here: https://github.com/calculuswhiz/buNaMo-to-sqlite/wiki/Testing-notes
+- Actionable issues will be added in the Issues tab.
