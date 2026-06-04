@@ -1,0 +1,358 @@
+Transformation types by suffix:
+Suffix: t -> te
+ 1. +e: 205
+Suffix: s -> se
+ 1. +e: 256
+Suffix: d -> de
+ 1. +e: 239
+Suffix: ach -> aí
+ 1. aí: 92
+Suffix: ann -> ainne
+ 1. palatalized + e: 70
+Suffix: óg -> óige
+ 1. palatalized + e: 194
+Suffix: seach -> sí
+ 1. í: 17
+Suffix: n -> ne
+ 1. +e: 155
+Suffix: arc -> airce
+ 1. palatalized + e: 1
+Suffix: b -> be
+ 1. +e: 22
+Suffix: c -> ce
+ 1. +e: 125
+Suffix: eabh -> eibhe
+ 1. palatalized alt + e: 2
+Suffix: onn -> oinne
+ 1. palatalized + e: 9
+Suffix: l -> le
+ 1. +e: 127
+Suffix: all -> aille
+ 1. palatalized + e: 2
+Suffix: h -> he
+ 1. +e: 67
+Suffix: tir -> tre
+ 1. syncope + e: 1
+Suffix: og -> oige
+ 1. palatalized + e: 71
+Suffix: m -> me
+ 1. +e: 94
+Suffix: p -> pe
+ 1. +e: 34
+Suffix: riar -> réire
+ 1. palatalized + e: 1
+Suffix: r -> re
+ 1. +e: 67
+Suffix: hian -> héine
+ 1. palatalized + e: 3
+Suffix: cian -> céine
+ 1. palatalized + e: 2
+Suffix: v -> ve
+ 1. +e: 1
+Suffix: g -> ge
+ 1. +e: 54
+Suffix: och -> oiche
+ 1. palatalized + e: 15
+Suffix: neal -> nle
+ 1. syncope + e: 2
+Suffix: óf -> óife
+ 1. palatalized + e: 1
+Suffix: e -> e
+ 1. unknown: 2
+Suffix: íoch -> íche
+ 1. palatalized + e: 14
+Suffix: ámh -> áimhe
+ 1. palatalized + e: 5
+Suffix: adhbh -> aidhbhe
+ 1. palatalized + e: 1
+Suffix: reach -> rí
+ 1. í: 12
+Suffix: leac -> lice
+ 1. palatalized + e: 2
+Suffix: riall -> réille
+ 1. palatalized + e: 1
+Suffix: as -> aise
+ 1. palatalized + e: 2
+Suffix: áb -> áibe
+ 1. palatalized + e: 1
+Suffix: teach -> tí
+ 1. í: 3
+Suffix: each -> eiche
+ 1. palatalized alt + e: 4
+Suffix: beann -> binne
+ 1. palatalized + e: 1
+Suffix: íog -> íge
+ 1. palatalized + e: 4
+Suffix: osc -> oisce
+ 1. palatalized + e: 1
+Suffix: easc -> eisce
+ 1. palatalized alt + e: 4
+Suffix: obair -> oibre
+ 1. palatalized syncope + e: 10
+Suffix: shliabh -> sléibhe
+ 1. exception: 1
+Suffix: ag -> aige
+ 1. palatalized + e: 1
+Suffix: reann -> rne
+ 1. syncope + e: 4
+Suffix: eac -> eice
+ 1. palatalized alt + e: 2
+Suffix: os -> oise
+ 1. palatalized + e: 3
+Suffix: eab -> eibe
+ 1. palatalized alt + e: 3
+Suffix: eall -> eille
+ 1. palatalized alt + e: 2
+Suffix: éag -> éige
+ 1. palatalized + e: 2
+Suffix: deach -> dí
+ 1. í: 2
+Suffix: neall -> nille
+ 1. palatalized + e: 1
+Suffix: hean -> hne
+ 1. syncope + e: 2
+Suffix: neach -> ní
+ 1. í: 16
+Suffix: íon -> íne
+ 1. íne: 4
+ 2. palatalized + e: 5
+Suffix: at -> aite
+ 1. palatalized + e: 3
+Suffix: ac -> aice
+ 1. palatalized + e: 2
+Suffix: af -> aife
+ 1. palatalized + e: 1
+Suffix: óc -> óice
+ 1. palatalized + e: 1
+Suffix: ioc -> ice
+ 1. palatalized + e: 3
+Suffix: adhain -> aidhne
+ 1. palatalized syncope + e: 1
+Suffix: dil -> dle
+ 1. syncope + e: 2
+Suffix: leann -> lle
+ 1. exception: 1
+Suffix: leach -> lí
+ 1. í: 5
+Suffix: gean -> gne
+ 1. syncope + e: 1
+Suffix: neann -> ninne
+ 1. palatalized + e: 3
+Suffix: or -> oire
+ 1. palatalized + e: 2
+Suffix: cearc -> circe
+ 1. palatalized + e: 1
+Suffix: ciabh -> céibhe
+ 1. palatalized + e: 1
+Suffix: ciall -> céille
+ 1. palatalized + e: 1
+Suffix: adhb -> aidhbe
+ 1. palatalized + e: 2
+Suffix: íor -> íre
+ 1. palatalized + e: 2
+Suffix: liath -> léithe
+ 1. palatalized + e: 1
+Suffix: geal -> gile
+ 1. palatalized + e: 1
+Suffix: orr -> oirre
+ 1. palatalized + e: 2
+Suffix: éar -> éire
+ 1. palatalized + e: 3
+Suffix: obh -> oibhe
+ 1. palatalized + e: 1
+Suffix: ág -> áige
+ 1. palatalized + e: 4
+Suffix: ach -> aiche
+ 1. palatalized + e: 3
+Suffix: úb -> úibe
+ 1. palatalized + e: 3
+Suffix: geann -> ginne
+ 1. palatalized + e: 1
+Suffix: leann -> linne
+ 1. palatalized + e: 1
+Suffix: anc -> aince
+ 1. palatalized + e: 2
+Suffix: abhach -> aibhche
+ 1. palatalized syncope + e: 1
+Suffix: hear -> hre
+ 1. syncope + e: 1
+Suffix: ealbh -> eilbhe
+ 1. palatalized alt + e: 1
+Suffix: ealg -> eilge
+ 1. palatalized alt + e: 1
+Suffix: fir -> fre
+ 1. syncope + e: 1
+Suffix: f -> fe
+ 1. +e: 7
+Suffix: dias -> déise
+ 1. palatalized + e: 1
+Suffix: úg -> úige
+ 1. palatalized + e: 1
+Suffix: dean -> dine
+ 1. palatalized + e: 2
+Suffix: omhain -> oimhne
+ 1. palatalized syncope + e: 1
+Suffix: hil -> hle
+ 1. syncope + e: 1
+Suffix: ong -> oinge
+ 1. palatalized + e: 4
+Suffix: umhach -> uimhche
+ 1. palatalized syncope + e: 1
+Suffix: earr -> eirre
+ 1. palatalized alt + e: 1
+Suffix: ang -> ainge
+ 1. palatalized + e: 2
+Suffix: hin -> hne
+ 1. syncope + e: 2
+Suffix: ead -> eide
+ 1. palatalized alt + e: 3
+Suffix: earb -> eirbe
+ 1. palatalized alt + e: 2
+Suffix: earg -> eirge
+ 1. palatalized alt + e: 4
+Suffix: cil -> cle
+ 1. syncope + e: 2
+Suffix: heall -> hille
+ 1. palatalized + e: 1
+Suffix: iodh -> idhe
+ 1. palatalized + e: 1
+Suffix: othair -> oithre
+ 1. palatalized syncope + e: 1
+Suffix: éamh -> éimhe
+ 1. palatalized + e: 2
+Suffix: al -> aile
+ 1. palatalized + e: 2
+Suffix: oth -> oithe
+ 1. palatalized + e: 4
+Suffix: ealt -> eilte
+ 1. palatalized alt + e: 1
+Suffix: eanc -> eince
+ 1. palatalized alt + e: 1
+Suffix: heal -> hle
+ 1. syncope + e: 3
+Suffix: hiall -> héille
+ 1. palatalized + e: 3
+Suffix: rian -> réine
+ 1. palatalized + e: 1
+Suffix: deall -> dille
+ 1. palatalized + e: 1
+Suffix: íobh -> íbhe
+ 1. palatalized + e: 1
+Suffix: l -> e
+ 1. palatalized + e: 1
+Suffix: n -> e
+ 1. palatalized + e: 1
+Suffix: nis -> nse
+ 1. syncope + e: 2
+Suffix: íoc -> íce
+ 1. palatalized + e: 3
+Suffix: adhar -> aidhre
+ 1. palatalized syncope + e: 1
+Suffix: asc -> aisce
+ 1. palatalized + e: 1
+Suffix: eadhb -> eidhbe
+ 1. palatalized alt + e: 1
+Suffix: eath -> eithe
+ 1. palatalized alt + e: 1
+Suffix: liach -> léiche
+ 1. palatalized + e: 1
+Suffix: liag -> léige
+ 1. palatalized + e: 1
+Suffix: hic -> hce
+ 1. syncope + e: 1
+Suffix: íoch -> í
+ 1. í: 1
+Suffix: uch -> uiche
+ 1. palatalized + e: 1
+Suffix: seag -> sige
+ 1. palatalized + e: 1
+Suffix: am -> aime
+ 1. palatalized + e: 1
+Suffix: eadar -> eidre
+ 1. palatalized alt syncope + e: 1
+Suffix: eang -> einge
+ 1. palatalized alt + e: 2
+Suffix: hir -> hre
+ 1. syncope + e: 1
+Suffix: mian -> méine
+ 1. palatalized + e: 1
+Suffix: mias -> méise
+ 1. palatalized + e: 1
+Suffix: abh -> aibhe
+ 1. palatalized + e: 1
+Suffix: uc -> uice
+ 1. palatalized + e: 1
+Suffix: úch -> úiche
+ 1. palatalized + e: 2
+Suffix: eamh -> eimhe
+ 1. palatalized alt + e: 2
+Suffix: niamh -> néimhe
+ 1. palatalized + e: 1
+Suffix: feach -> fí
+ 1. í: 1
+Suffix: reann -> rinne
+ 1. palatalized + e: 1
+Suffix: ógh -> óighe
+ 1. palatalized + e: 1
+Suffix: dir -> dre
+ 1. syncope + e: 1
+Suffix: pian -> péine
+ 1. palatalized + e: 1
+Suffix: éasc -> éisce
+ 1. palatalized + e: 1
+Suffix: ceall -> cille
+ 1. palatalized + e: 1
+Suffix: uth -> uithe
+ 1. palatalized + e: 2
+Suffix: riabh -> réibhe
+ 1. palatalized + e: 1
+Suffix: leas -> lse
+ 1. syncope + e: 1
+Suffix: head -> hde
+ 1. syncope + e: 1
+Suffix: eart -> eirte
+ 1. palatalized alt + e: 1
+Suffix: ian -> ine
+ 1. exception: 1
+Suffix: ciath -> céithe
+ 1. palatalized + e: 1
+Suffix: éach -> éiche
+ 1. palatalized + e: 1
+Suffix: ab -> aibe
+ 1. palatalized + e: 1
+Suffix: eamair -> eimre
+ 1. palatalized alt syncope + e: 1
+Suffix: earc -> eirce
+ 1. palatalized alt + e: 2
+Suffix: cin -> cne
+ 1. syncope + e: 1
+Suffix: sian -> séine
+ 1. palatalized + e: 1
+Suffix: liabh -> léibhe
+ 1. palatalized + e: 1
+Suffix: asaid -> aiste
+ 1. palatalized syncope + e: 1
+Suffix: ád -> áide
+ 1. palatalized + e: 1
+Suffix: ón -> óine
+ 1. palatalized + e: 1
+Suffix: ubh -> uibhe
+ 1. palatalized + e: 3
+Suffix: tiall -> téille
+ 1. palatalized + e: 1
+Suffix: éac -> éice
+ 1. palatalized + e: 1
+Suffix: éad -> éide
+ 1. palatalized + e: 1
+Suffix: his -> hse
+ 1. syncope + e: 1
+Suffix: mil -> mle
+ 1. syncope + e: 1
+Suffix: hid -> hde
+ 1. syncope + e: 1
+Suffix: lis -> lse
+ 1. syncope + e: 1
+Suffix: ath -> aithe
+ 1. palatalized + e: 1
+Suffix: t -> the
+ 1. exception: 1
