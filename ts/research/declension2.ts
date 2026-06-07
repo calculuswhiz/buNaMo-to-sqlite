@@ -2,7 +2,7 @@ import path from "node:path";
 import { getExistingDb, Repository } from "../repository";
 import { open } from "node:fs/promises";
 import { _nn } from "../util";
-import { Consonants, isSlender, palatalizationReplaceTable, palatalize, syncope } from "../mutators";
+import { Consonants, countSyllables, isSlender, palatalizationReplaceTable, palatalize, syncope } from "../mutators";
 
 /* The goal of this file is to find rules for mapping 2nd declension nominative forms to genitive forms */
 
@@ -17,6 +17,7 @@ type TransformationType = "+e"
   | "syncope + e"
   | "palatalized syncope + e"
   | "palatalized alt syncope + e"
+  | "ingthe"
   | "exception"
   | "unknown";
 
@@ -40,6 +41,9 @@ function classifyTransformation(nominative: string, genitive: string):
   TransformationType {
   if (genitive === nominative + "e")
     return "+e";
+  else if (genitive === palatalize(nominative, undefined, palatalizedAltTable) + "e") {
+    return "palatalized alt + e";
+  }
   else if (genitive === palatalize(nominative) + "e")
     return "palatalized + e";
   else if (nominative !== genitive && (genitive === nominative.replace(/each$/, "í")
@@ -53,14 +57,15 @@ function classifyTransformation(nominative: string, genitive: string):
     return "íne";
   else if (nominative !== genitive && genitive === syncope(nominative) + "e")
     return "syncope + e";
+  else if (genitive === palatalize(syncope(nominative), undefined, palatalizedAltTable) + "e") {
+    return "palatalized alt syncope + e";
+  }
   else if (genitive === palatalize(syncope(nominative)) + "e")
     return "palatalized syncope + e";
-  else if (nominative === "scian" || nominative === "caileann" || nominative === "blocshliabh" || nominative === "tuirlingt") {
+  else if (nominative !== genitive && genitive === nominative.replace(/ingt$/, "ingthe"))
+    return "ingthe";
+  else if (nominative === "scian" || nominative === "caileann" || nominative === "blocshliabh") {
     return "exception";
-  } else if (genitive === palatalize(nominative, undefined, palatalizedAltTable) + "e") {
-    return "palatalized alt + e";
-  } else if (genitive === palatalize(syncope(nominative), undefined, palatalizedAltTable) + "e") {
-    return "palatalized alt syncope + e";
   }
   else
     return "unknown";
@@ -70,6 +75,9 @@ const suffixToTransformationTypes: Map<
   string,
   Map<TransformationType, number>
 > = new Map();
+
+const transformationTypeToSuffixes: Map<
+  TransformationType, Map<string, number>> = new Map();
 
 repository.initialize().then(async () => {
   const all2ndDeclensionNounsIter = repository.db.prepare(
@@ -93,8 +101,8 @@ repository.initialize().then(async () => {
   declensionNounsFile.appendFile(
     [
       "nounId", "nominative", "genitive",
-      "transformationType", "isSlender",
-      "nomSuffix", "genSuffix"
+      "transformationType", "isSlender", "syllableCount",
+      "nomSuffix", "genSuffix", "has ea"
     ].join(",") + "\n"
   );
   for (const [nounId, rows] of groupedNouns) {
@@ -127,14 +135,25 @@ repository.initialize().then(async () => {
         (transformationMap.get(transformationType) ?? 0) + 1
       );
 
+      if (!transformationTypeToSuffixes.has(transformationType)) {
+        transformationTypeToSuffixes.set(transformationType, new Map());
+      }
+      const suffixMap = transformationTypeToSuffixes.get(transformationType)!;
+      suffixMap.set(
+        suffixKey,
+        (suffixMap.get(suffixKey) ?? 0) + 1
+      );
+
       await declensionNounsFile.appendFile([
         nounId,
         nominative,
         genitive,
         transformationType,
         isSlenderValue,
+        countSyllables(nominative),
         nomSuffix,
-        genSuffix
+        genSuffix,
+        (new RegExp(`ea[${Consonants}]*$`)).test(nominative) ? "yes" : "no"
       ].map(value => JSON.stringify(value)).join(",") + "\n");
     }
   }
@@ -147,6 +166,16 @@ repository.initialize().then(async () => {
     let idx = 1;
     for (const [transformationType, count] of transformationMap) {
       await nounStatsFile.appendFile(` ${idx}. ${transformationType}: ${count}\n`);
+      idx++;
+    }
+  }
+
+  await nounStatsFile.appendFile("\n-----\nSuffixes by transformation type:\n");
+  for (const [transformationType, suffixMap] of transformationTypeToSuffixes) {
+    await nounStatsFile.appendFile(`Transformation type: ${transformationType}\n`);
+    let idx = 1;
+    for (const [suffix, count] of suffixMap) {
+      await nounStatsFile.appendFile(` ${idx}. ${suffix}: ${count}\n`);
       idx++;
     }
   }

@@ -7,9 +7,11 @@ Contains:
 - Tools for converting the BuNaMo data into a SQLite database.
 - A pre-built version of the database and an SQL file describing the schema.
 - TypeScript code for working with the database (ported from Gramadan).
+- Research on declension patterns in the BuNaMo data. Some reports can be found on the [wiki][3].
 
 [1]: https://github.com/michmech/BuNaMo
 [2]: https://github.com/michmech/Gramadan
+[3]: https://github.com/calculuswhiz/buNaMo-to-sqlite/wiki/
 
 ## DB Schema
 
