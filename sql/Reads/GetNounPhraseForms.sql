@@ -5,4 +5,4 @@ SELECT
   form.gender AS gender
 FROM
   noun_phrase_form form
-WHERE form.noun_phrase_id = :foundId
+WHERE form.noun_phrase_id = $foundId

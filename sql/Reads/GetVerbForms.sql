@@ -8,4 +8,4 @@ SELECT
   form.person AS person
 FROM
   verb_form form
-WHERE form.verb_id = :verbId
+WHERE form.verb_id = $verbId

@@ -1,34 +1,47 @@
-// My own implementation of a Result type implementing the more useful functions from neverthrow from NPM.
+type ResultCommon<TOk extends boolean, T, E> = {
+  /** Result is OK. Usually easier to check isErr instead */
+  readonly isOk: TOk;
+  /** Defined for convenience. Opposite of isOk. */
+  readonly isErr: TOk extends true ? false : true;
 
-type _Ok<T> = { readonly isOk: true, readonly value: T };
-type _Err<T> = { readonly isOk: false, readonly error: T };
-type _Result<T, E> = _Ok<T> | _Err<E>;
-
-interface IResult<T, E> {
-  unwrapOr<U>(defaultValue: U): T | U;
-  mapIfOk<U>(fn: (arg: T) => U): Result<U, E>;
-};
-export type Result<T, E> = IResult<T, E> & _Result<T, E>;
-export type Ok<T> = Result<T, never>;
-export type Err<E> = Result<never, E>;
-
-/** Create a result type */
-function result<T = never, E = never>(init: _Result<T, E>): Result<T, E> {
-  return {
-    ...init,
-    /** Unwrap the result if it is Ok, otherwise return the default value */
-    unwrapOr: d => init.isOk ? init.value : d,
-    /** Map the result if it is Ok, otherwise return the original Err */
-    mapIfOk: fn => init.isOk ? ok(fn(init.value)) : err(init.error)
-  };
+  /** Unwrap if Ok, otherwise give supplied value */
+  unwrapOr<U>(defaultValue: U): TOk extends true ? T : U;
+  /** If the result is Ok, map to another value */
+  mapOk<U>(fn: (arg: T) => U): TOk extends true ? Ok<U> : Err<E>;
+  /** If the result is Err, map to another value */
+  mapErr<U>(fn: (arg: E) => U): TOk extends true ? Ok<T> : Err<U>;
+  /** Log the value */
+  logErr(): TOk extends true ? Ok<T> : Err<E>;
 }
 
-/** Create an Ok result */
+export type Ok<T> = ResultCommon<true, T, never> & { readonly value: T }
+export type Err<E> = ResultCommon<false, never, E> & { readonly error: E }
+/** Combined result type */
+export type Result<T, E> = Ok<T> | Err<E>;
+
 export function ok<T>(value: T): Ok<T> {
-  return result({ isOk: true, value });
+  const result = {
+    isOk: true, isErr: false, value,
+    unwrapOr: () => value,
+    mapOk: fn => ok(fn(value)),
+    mapErr: () => result,
+    logErr: () => result
+  } as Ok<T>;
+
+  return result;
 }
 
-/** Create an Err result */
 export function err<E>(error: E): Err<E> {
-  return result({ isOk: false, error });
+  const result = {
+    isOk: false, isErr: true, error,
+    unwrapOr: defaultVal => defaultVal,
+    mapOk: () => result,
+    mapErr: fn => err(fn(error)),
+    logErr: () => {
+      console.error(error);
+      return result;
+    }
+  } as Err<E>;
+
+  return result;
 }

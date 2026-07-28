@@ -4,4 +4,4 @@ SELECT
   form.value AS value
 FROM
   adjective_form form
-WHERE form.adjective_id = :foundId
+WHERE form.adjective_id = $foundId

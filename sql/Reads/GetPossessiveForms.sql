@@ -4,4 +4,4 @@ SELECT
   form.value AS value
 FROM
   possessive_form form
-WHERE form.possessive_id = :foundId
+WHERE form.possessive_id = $foundId

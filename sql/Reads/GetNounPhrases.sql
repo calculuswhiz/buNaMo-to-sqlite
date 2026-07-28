@@ -7,4 +7,4 @@ SELECT
   np.disambig AS disambig
 FROM noun_phrase AS np
 JOIN noun_phrase_form AS form ON form.noun_phrase_id = np.noun_phrase_id
-WHERE form.form_name = 'sgNom' AND form.value = :lemma
+WHERE form.form_name = 'sgNom' AND form.value = $lemma

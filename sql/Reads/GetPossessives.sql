@@ -6,4 +6,4 @@ SELECT
   p.lemma AS lemma
 FROM possessive AS p
 JOIN possessive_form AS form ON form.possessive_id = p.possessive_id
-WHERE p.lemma = :lemma
+WHERE p.lemma = $lemma

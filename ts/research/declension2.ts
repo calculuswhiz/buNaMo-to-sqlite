@@ -90,7 +90,12 @@ repository.initialize().then(async () => {
   FROM noun AS n
   JOIN noun_form AS form ON form.noun_id = n.noun_id
   WHERE n.declension = 2 AND form.form_name IN ('sgNom', 'sgGen')`
-  ).iterate();
+  ).iterate() as Iterable<{
+    nounId?: number,
+    formName?: string,
+    value?: string,
+
+  }>;
 
   const groupedNouns = Map.groupBy(
     all2ndDeclensionNounsIter,

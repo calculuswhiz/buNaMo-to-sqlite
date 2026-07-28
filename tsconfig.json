@@ -4,6 +4,7 @@
     "target": "esnext",
     "lib": ["esnext"],
     "module": "ESNext",
+    "types": ["bun-types"],
     "skipLibCheck": true,
     "sourceMap": true,
 

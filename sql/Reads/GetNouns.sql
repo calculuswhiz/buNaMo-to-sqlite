@@ -8,4 +8,4 @@ SELECT
   n.disambig AS disambig
 FROM noun AS n
 JOIN noun_form AS form ON form.noun_id = n.noun_id
-WHERE form.form_name = 'sgNom' AND form.value = :lemma
+WHERE form.form_name = 'sgNom' AND form.value = $lemma

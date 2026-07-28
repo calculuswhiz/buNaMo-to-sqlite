@@ -6,4 +6,4 @@ SELECT
   form.strength AS strength
 FROM
   noun_form form
-WHERE form.noun_id = :foundId
+WHERE form.noun_id = $foundId
