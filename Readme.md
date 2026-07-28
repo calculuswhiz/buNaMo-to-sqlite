@@ -40,16 +40,16 @@ There are a few breaking changes if you are used to working with the original Bu
 
 To run the converter tool, you need to clone the **Irish National Morphology Database** [repository][1] to the root of this project.
 
-Then, install the npm dependencies:
+Then, install the bun dependencies:
 
 ```bash
-npm install
+bun install
 ```
 
 Finally, run the conversion:
 
 ```bash
-npm run rebuild
+bun run rebuild
 ```
 
 This creates `buNaMo.sqlite` in the output directory.
