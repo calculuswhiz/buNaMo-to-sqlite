@@ -1,7 +1,7 @@
 import xml2js from "xml2js";
 import fs from "fs/promises";
 import { initializeDefaultDb, Repository } from "./repository";
-import { ok, err, type Result } from "./neverEverThrow";
+import { ok, err, type Result } from "./NeverEverThrow/sync";
 
 // Transforms BuNaMo XML data into a SQLite database
 

@@ -8,7 +8,7 @@ import { NounPhrase, NounPhraseForm } from "./model/nounPhrase";
 import { Possessive, PossessiveForm } from "./model/possessive";
 import { Preposition, PrepositionForm } from "./model/preposition";
 import { Verb, VerbForm } from "./model/verb";
-import { err, ok, type Result } from "./neverEverThrow";
+import { ok, err, type Result } from "./NeverEverThrow/sync";
 
 const uninitializedErrorMessage = "Repository must be initialized before use (.initialize() must be called)";
 

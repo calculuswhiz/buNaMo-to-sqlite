@@ -1,5 +1,5 @@
 import { mutate, startsBilabial, startsVowel, startsVowelFhx } from "../mutators";
-import { err, ok, type Result } from "../neverEverThrow";
+import { ok, err, type Result } from "../NeverEverThrow/sync";
 import type { NounPhrase } from "./nounPhrase";
 import type { Preposition } from "./preposition";
 

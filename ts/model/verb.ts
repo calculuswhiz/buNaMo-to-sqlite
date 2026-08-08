@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "../neverEverThrow";
+import { ok, err, type Result } from "../NeverEverThrow/sync";
 import type { Mutation } from "../features";
 import { mutate } from "../mutators";
 import type { ILexeme } from "./ILexeme";

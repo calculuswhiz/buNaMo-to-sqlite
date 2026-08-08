@@ -1,4 +1,4 @@
-import { ok, err, type Result } from "./neverEverThrow";
+import { ok, err, type Result } from "./NeverEverThrow/sync";
 
 /** Runtime non-null assertion */
 export function _nn<T>(value: T | null | undefined, message?: string): NonNullable<T> {
